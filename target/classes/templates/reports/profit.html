@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="bn" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#profit-report-content}, 'সেলস অ্যাকাউন্টিং ও লাভ-ক্ষতি', 'reports-profit')}">
+<body>
+<div id="profit-report-content">
+
+    <!-- Header & Date Filter -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">JaHa সেলস অ্যাকাউন্টিং ও লাভ-ক্ষতি বিবরণী</h2>
+            <p class="text-muted small mb-0">মোট বিক্রয় রেভিনিউ, পণ্যের ক্রয়মূল্য (COGS), গ্রস মার্জিন, অপারেটিং খরচ ও নিট মুনাফা বিশ্লেষণ।</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> প্রিন্ট রিপোর্ট
+            </button>
+            <a th:href="@{/sales}" class="btn btn-danger">
+                <i class="bi bi-truck me-1"></i> লাইভ অর্ডার তালিকা
+            </a>
+        </div>
+    </div>
+
+    <!-- Date Range Filter Card -->
+    <div class="card border-0 shadow-sm mb-4 rounded-3">
+        <div class="card-body p-3">
+            <form th:action="@{/reports/profit}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted">শুরুর তারিখ (From Date)</label>
+                    <input type="date" name="startDate" class="form-control" th:value="${startDate}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold text-muted">শেষের তারিখ (To Date)</label>
+                    <input type="date" name="endDate" class="form-control" th:value="${endDate}" required>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-danger flex-grow-1 fw-bold">
+                        <i class="bi bi-funnel me-1"></i> হিসাব দেখুন
+                    </button>
+                    <a th:href="@{/reports/profit}" class="btn btn-outline-secondary">রিসেট</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPI Summary Row -->
+    <div class="row g-3 mb-4">
+        <!-- Revenue Card -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card shadow-sm border-0 border-start border-4 border-danger rounded-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold">মোট বিক্রয় রেভিনিউ</span>
+                            <h3 class="fw-bold text-dark mb-0 mt-1" th:text="'৳ ' + ${#numbers.formatDecimal(summary.totalSales, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                            <small class="text-muted">গ্রস বিক্রয় ও ডেলিভারি ফি</small>
+                        </div>
+                        <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle">
+                            <i class="bi bi-cash-coin fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Procurement / COGS Card -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card shadow-sm border-0 border-start border-4 border-info rounded-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold">মোট পণ্য সংগ্রহ খরচ</span>
+                            <h3 class="fw-bold text-dark mb-0 mt-1" th:text="'৳ ' + ${#numbers.formatDecimal(summary.totalPurchases, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                            <small class="text-muted">ইনওয়ার্ড স্টক ক্রয়মূল্য</small>
+                        </div>
+                        <div class="p-3 bg-info bg-opacity-10 text-info rounded-circle">
+                            <i class="bi bi-box-seam fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gross Profit Card -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card shadow-sm border-0 border-start border-4 border-warning rounded-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold">গ্রস মুনাফা (Gross Margin)</span>
+                            <h3 class="fw-bold mb-0 mt-1 text-success" th:text="'৳ ' + ${#numbers.formatDecimal(summary.grossProfit, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                            <small class="text-muted">বিক্রয় মূল্য মাইনাস পণ্যের ক্রয়মূল্য</small>
+                        </div>
+                        <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-circle">
+                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Profit Card -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card shadow-sm border-0 border-start border-4 border-success rounded-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold">প্রকৃত নিট মুনাফা (Net Profit)</span>
+                            <h3 class="fw-bold mb-0 mt-1" 
+                                th:classappend="${summary.netProfit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'text-success' : 'text-danger'}"
+                                th:text="'৳ ' + ${#numbers.formatDecimal(summary.netProfit, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                            <small class="text-muted">সকল দোকান ও মার্কেটিং খরচ বাদে</small>
+                        </div>
+                        <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle">
+                            <i class="bi bi-trophy-fill fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formal Statement Breakdown -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 rounded-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                    <div>
+                        <h4 class="fw-bold text-dark mb-0">হিসাব বিবরণী (Statement of Operations)</h4>
+                        <span class="text-muted small" th:text="'সময়কাল: ' + ${#temporals.format(summary.startDate, 'dd MMM yyyy')} + ' থেকে ' + ${#temporals.format(summary.endDate, 'dd MMM yyyy')}">Period</span>
+                    </div>
+                    <span class="badge bg-dark px-3 py-2 text-uppercase">AUDITED LEDGER</span>
+                </div>
+
+                <table class="table table-borderless align-middle mb-0">
+                    <tbody>
+                        <!-- Section: Revenue -->
+                        <tr class="table-light">
+                            <th colspan="2" class="text-uppercase text-secondary small fw-bold">১. মোট বিক্রয় রেভিনিউ (Operating Revenue)</th>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">গ্রাহকদের নিকট মোট পণ্য বিক্রয় (Online &amp; Counter)</td>
+                            <td class="text-end fw-semibold text-dark" th:text="'৳ ' + ${#numbers.formatDecimal(summary.totalSales, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        </tr>
+
+                        <!-- Section: Cost of Goods -->
+                        <tr class="table-light">
+                            <th colspan="2" class="text-uppercase text-secondary small fw-bold mt-2">২. পণ্যের সরবরাহ ও ক্রয় খরচ (Cost of Goods)</th>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">সাপ্লায়ার বা ইনওয়ার্ড স্টক ক্রয় বাবদ মোট খরচ</td>
+                            <td class="text-end fw-semibold text-muted" th:text="'৳ ' + ${#numbers.formatDecimal(summary.totalPurchases, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        </tr>
+
+                        <!-- Subtotal: Gross Profit -->
+                        <tr class="border-top border-bottom bg-light">
+                            <td class="fw-bold ps-4 text-dark">গ্রস মার্জিন / মোট মুনাফা (Gross Profit)</td>
+                            <td class="text-end fw-bold fs-6 text-success" th:text="'৳ ' + ${#numbers.formatDecimal(summary.grossProfit, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        </tr>
+
+                        <!-- Section: Operating Expenses -->
+                        <tr class="table-light">
+                            <th colspan="2" class="text-uppercase text-secondary small fw-bold mt-2">৩. দোকান ও পরিচালনা খরচ (Operating Expenses)</th>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">দোকান ভাড়া, বিদ্যুৎ বিল, প্যাকেজিং সামগ্রী ও বিজ্ঞাপন খরচ</td>
+                            <td class="text-end fw-semibold text-danger" th:text="'- ৳ ' + ${#numbers.formatDecimal(summary.totalExpenses, 0, 'COMMA', 0, 'POINT')}">- ৳ 0</td>
+                        </tr>
+
+                        <!-- Bottom Line: Net Profit -->
+                        <tr class="border-top border-3"
+                            th:classappend="${summary.netProfit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'table-success' : 'table-danger'}">
+                            <td class="fw-bold ps-4 fs-5 text-dark">প্রকৃত নিট মুনাফা (Net Operating Profit)</td>
+                            <td class="text-end fw-bold fs-4"
+                                th:classappend="${summary.netProfit.compareTo(T(java.math.BigDecimal).ZERO) >= 0 ? 'text-success' : 'text-danger'}"
+                                th:text="'৳ ' + ${#numbers.formatDecimal(summary.netProfit, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Profitability Insights Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm p-4 mb-3 rounded-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-lightbulb-fill text-warning me-2"></i>আর্থিক সারসংক্ষেপ</h5>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>মোট বিক্রয়:</span>
+                        <span class="fw-bold text-dark" th:text="'৳ ' + ${#numbers.formatDecimal(summary.totalSales, 0, 'COMMA', 0, 'POINT')}">৳ 0</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>মোট পরিচালন ব্যয়:</span>
+                        <span class="fw-bold text-danger" th:text="'৳ ' + ${#numbers.formatDecimal(summary.totalExpenses, 0, 'COMMA', 0, 'POINT')}">৳ 0</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>নিট মুনাফা:</span>
+                        <span class="fw-bold text-success fs-6" th:text="'৳ ' + ${#numbers.formatDecimal(summary.netProfit, 0, 'COMMA', 0, 'POINT')}">৳ 0</span>
+                    </li>
+                </ul>
+                <div class="mt-3 p-3 bg-light rounded-3 text-muted small">
+                    <i class="bi bi-shield-check text-success me-1"></i>
+                    JaHa সিস্টেম স্বয়ংক্রিয়ভাবে প্রতি সেলসের ইনভয়েস থেকে ক্রয়মূল্য ও বিক্রয়মূল্যের পার্থক্য হিসাব করে নিট লাভ তৈরি করে।
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-white" style="background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);">
+                <h6 class="fw-bold text-warning mb-2"><i class="bi bi-cash-stack me-2"></i>ক্যাশ অন ডেলিভারি হিসাব</h6>
+                <p class="small text-white-50 mb-0">
+                    কুরিয়ারে পাঠানো পণ্যের টাকা ডেলিভারি সম্পন্ন হলে স্বয়ংক্রিয়ভাবে আদায়ে যুক্ত হয়। কুরিয়ার পেমেন্ট রিকনসিলিয়েশন সম্পন্ন করতে <a th:href="@{/sales}" class="text-warning">অর্ডার তালিকায়</a> ডেলিভারি স্ট্যাটাস আপডেট করুন।
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

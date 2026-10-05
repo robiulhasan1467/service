@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="bn" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#product-form-content}, 'পণ্য পোস্ট ও পরিচালনা', 'products')}">
+<body>
+<div id="product-form-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1" th:text="${product.id == null ? 'নতুন পণ্য পোস্ট করুন (Add New Product)' : 'পণ্য সম্পাদনা (Edit Product #' + product.id + ')'}">পণ্য পরিচালনা</h2>
+            <p class="text-muted small mb-0">JaHa লাইভ শপিং স্টোরের জন্য পণ্য, মূল্য, স্টক ও ছবি সেট করুন।</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/products}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> পণ্যের তালিকা
+            </a>
+            <a th:href="@{/}" target="_blank" class="btn btn-outline-danger">
+                <i class="bi bi-eye me-1"></i> লাইভ স্টোর দেখুন
+            </a>
+        </div>
+    </div>
+
+    <!-- Error Alert if any -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}">Error</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 rounded-4" style="max-width: 950px; margin: 0 auto; background: #ffffff;">
+        <form th:action="@{/products/save}" th:object="${product}" method="post" id="postProductForm">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="row g-4">
+                <!-- 1. Basic Info Section -->
+                <div class="col-12 border-bottom pb-2">
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-info-circle text-danger me-2"></i>প্রাথমিক তথ্য (Basic Info)</h5>
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold">পণ্যের নাম (Product Name) <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}" class="form-control form-control-lg" placeholder="যেমন: Naviforce Dual Movement Watch, Pure Leather Wallet" required>
+                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger small mt-1"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">প্রোডাক্ট কোড / SKU <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="text" th:field="*{sku}" id="skuInput" class="form-control form-control-lg" placeholder="e.g. JH-WCH-099" required>
+                        <button class="btn btn-outline-secondary" type="button" onclick="generateSku()" title="Generate Random SKU">
+                            <i class="bi bi-magic"></i>
+                        </button>
+                    </div>
+                    <div th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}" class="text-danger small mt-1"></div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">ক্যাটাগরি (Category) <span class="text-danger">*</span></label>
+                    <select th:field="*{category}" class="form-select form-select-lg" required>
+                        <option value="">-- ক্যাটাগরি নির্বাচন করুন --</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">ব্র্যান্ড (Brand)</label>
+                    <select th:field="*{brand}" class="form-select form-select-lg">
+                        <option value="">-- ব্র্যান্ড নির্বাচন করুন (বা নিজস্ব) --</option>
+                        <option th:each="br : ${brands}" th:value="${br.id}" th:text="${br.name}"></option>
+                    </select>
+                </div>
+
+                <!-- 2. Product Image Section -->
+                <div class="col-12 border-bottom pb-2 pt-2">
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-image text-danger me-2"></i>পণ্যের ছবি (Product Image)</h5>
+                    <small class="text-muted">ইন্টারনেট লিংক (Unsplash, CDN বা লোকাল পাথ) দিন। ডানপাশে তাৎক্ষণিক প্রিভিউ দেখতে পাবেন।</small>
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold">ছবির লিংক (Image URL)</label>
+                    <input type="url" th:field="*{imagePath}" id="imagePathInput" class="form-control" 
+                           placeholder="https://images.unsplash.com/... বা /images/your-photo.jpg" 
+                           oninput="updateImagePreview(this.value)">
+                    
+                    <!-- Quick Presets -->
+                    <div class="mt-2">
+                        <small class="text-muted d-block mb-1">কুইক স্যাম্পল ইমেজ বাছাই করুন:</small>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 0.75rem;" 
+                                    onclick="setImageUrl('https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=600&auto=format&fit=crop&q=80')">⌚ Watch</button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 0.75rem;" 
+                                    onclick="setImageUrl('https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&auto=format&fit=crop&q=80')">👜 Wallet</button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 0.75rem;" 
+                                    onclick="setImageUrl('https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600&auto=format&fit=crop&q=80')">🕶️ Sunglass</button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 0.75rem;" 
+                                    onclick="setImageUrl('https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=600&auto=format&fit=crop&q=80')">👕 Panjabi</button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 0.75rem;" 
+                                    onclick="setImageUrl('https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&auto=format&fit=crop&q=80')">🎧 Gadget</button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 0.75rem;" 
+                                    onclick="setImageUrl('https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80')">🍫 Gift Box</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-center">
+                    <label class="form-label fw-semibold d-block">ছবির প্রিভিউ (Preview)</label>
+                    <div class="border rounded-3 p-2 bg-light d-inline-block" style="width: 140px; height: 140px; overflow: hidden;">
+                        <img id="imagePreviewImg" 
+                             th:src="${product.imagePath != null and !product.imagePath.isEmpty() ? product.imagePath : '/images/jaha_logo_transparent.png'}"
+                             alt="Preview" 
+                             style="width: 100%; height: 100%; object-fit: cover;" 
+                             class="rounded">
+                    </div>
+                </div>
+
+                <!-- 3. Pricing Section -->
+                <div class="col-12 border-bottom pb-2 pt-2">
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-cash-stack text-danger me-2"></i>মূল্য ও অফার (Pricing &amp; Margins in ৳ BDT)</h5>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">ক্রয় মূল্য / খরচ (Purchase Cost ৳) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text fw-bold">৳</span>
+                        <input type="number" th:field="*{purchasePrice}" id="inputPurchasePrice" class="form-control" step="1" min="0" placeholder="e.g. 1200" required oninput="calcMargin()">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">নিয়মিত বিক্রয় মূল্য (Regular Price ৳) <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text fw-bold">৳</span>
+                        <input type="number" th:field="*{sellingPrice}" id="inputSellingPrice" class="form-control" step="1" min="0" placeholder="e.g. 1950" required oninput="calcMargin()">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">অফার / ফ্ল্যাশ সেল মূল্য (Discount Price ৳)</label>
+                    <div class="input-group">
+                        <span class="input-group-text fw-bold text-danger">৳</span>
+                        <input type="number" th:field="*{discountPrice}" id="inputDiscountPrice" class="form-control" step="1" min="0" placeholder="ঐচ্ছিক (অফার মূল্য)" oninput="calcMargin()">
+                    </div>
+                    <small class="text-muted" style="font-size: 0.75rem;">অফার মূল্য দিলে হোমপেজে ফ্ল্যাশ সেলে প্রদর্শিত হবে</small>
+                </div>
+
+                <div class="col-12">
+                    <div class="p-2 rounded bg-light border d-flex justify-content-between align-items-center small">
+                        <span><i class="bi bi-calculator me-1"></i> আনুমানিক প্রতি পিসে মুনাফা (Est. Profit): <strong id="estProfit" class="text-success fs-6">৳ 0</strong></span>
+                        <span id="estMargin" class="badge bg-success bg-opacity-10 text-success fw-bold">0% Margin</span>
+                    </div>
+                </div>
+
+                <!-- 4. Inventory Section -->
+                <div class="col-12 border-bottom pb-2 pt-2">
+                    <h5 class="fw-bold text-dark mb-1"><i class="bi bi-boxes text-danger me-2"></i>স্টক ও ইনভেন্টরি (Stock &amp; Units)</h5>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">উপলব্ধ স্টক পরিমাণ (Stock Quantity) <span class="text-danger">*</span></label>
+                    <input type="number" th:field="*{stockQuantity}" class="form-control form-control-lg" step="1" min="0" placeholder="e.g. 50" required>
+                    <small class="text-muted">গ্রাহক অর্ডার করলে স্বয়ংক্রিয়ভাবে স্টক কমবে</small>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">ন্যূনতম স্টক সতর্কবার্তা (Min Stock Alert)</label>
+                    <input type="number" th:field="*{minStockLevel}" class="form-control form-control-lg" step="1" min="0" value="5" required>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">একক (Unit)</label>
+                    <input type="text" th:field="*{unit}" class="form-control form-control-lg" placeholder="pcs, box, pack, set">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">ওজন / সাইজ (Weight/Size)</label>
+                    <input type="number" th:field="*{weight}" class="form-control" step="0.1" min="0" placeholder="গ্রাম বা মিলি">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">স্ট্যাটাস (Status)</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="ACTIVE">সক্রিয় (ACTIVE) - দোকানে দেখাবে</option>
+                        <option value="INACTIVE">নিষ্ক্রিয় (INACTIVE) - লুকানো থাকবে</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">মেয়াদোত্তীর্ণ তারিখ (Expiry Date)</label>
+                    <input type="date" th:field="*{expiryDate}" class="form-control">
+                </div>
+
+                <!-- 5. Description -->
+                <div class="col-12">
+                    <label class="form-label fw-semibold">পণ্যের বিবরণ ও বৈশিষ্ট্য (Product Description)</label>
+                    <textarea th:field="*{description}" class="form-control" rows="3" placeholder="পণ্যের ম্যাটেরিয়াল, ওয়ারেন্টি, স্পেসিফিকেশন ও ব্যবহারের নিয়ম..."></textarea>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+                <a th:href="@{/products}" class="btn btn-outline-secondary px-4">বাতিল করুন</a>
+                <button type="submit" class="btn btn-danger btn-lg px-5 fw-bold shadow">
+                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> পণ্য পোস্ট করুন (Save &amp; Publish)
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    function updateImagePreview(url) {
+        const preview = document.getElementById('imagePreviewImg');
+        if (url && url.trim().length > 5) {
+            preview.src = url.trim();
+        } else {
+            preview.src = '/images/jaha_logo_transparent.png';
+        }
+    }
+
+    function setImageUrl(url) {
+        document.getElementById('imagePathInput').value = url;
+        updateImagePreview(url);
+    }
+
+    function generateSku() {
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('skuInput').value = 'JH-PRD-' + rand;
+    }
+
+    function calcMargin() {
+        const buy = parseFloat(document.getElementById('inputPurchasePrice').value) || 0;
+        const sell = parseFloat(document.getElementById('inputDiscountPrice').value) || 
+                     parseFloat(document.getElementById('inputSellingPrice').value) || 0;
+        
+        const profit = sell - buy;
+        const margin = buy > 0 ? ((profit / buy) * 100).toFixed(1) : 0;
+
+        document.getElementById('estProfit').textContent = '৳ ' + profit.toLocaleString();
+        document.getElementById('estMargin').textContent = margin + '% Markup';
+    }
+</script>
+</body>
+</html>

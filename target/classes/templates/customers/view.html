@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#customer-view-content}, 'Customer Statement', 'customers')}">
+<body>
+<div id="customer-view-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1" th:text="${customer.name}">Customer Name</h2>
+            <p class="text-muted small mb-0" th:text="${customer.isWalkIn} ? 'Walk-in Counter Shopper' : 'Registered Customer | ' + ${customer.phone}">Details</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/customers}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Customer List
+            </a>
+            <button type="button" class="btn btn-artisan" data-bs-toggle="modal" data-bs-target="#customerPaymentModal">
+                <i class="bi bi-cash me-1"></i> Receive Due Payment
+            </button>
+        </div>
+    </div>
+
+    <!-- Outstanding Due Balance Card -->
+    <div class="card border-0 shadow-sm p-4 mb-4 bg-white">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <span class="text-muted small text-uppercase fw-semibold">Receivable Due Balance</span>
+                <h2 class="fw-bold mb-0 text-danger" th:text="'$' + ${#numbers.formatDecimal(currentDue, 1, 2)}">$0.00</h2>
+                <small class="text-muted">Opening due + unpaid sale dues - payments received</small>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <span class="text-muted d-block small">Email: <span class="text-dark" th:text="${customer.email != null ? customer.email : 'N/A'}">email</span></span>
+                <span class="text-muted d-block small">Address: <span class="text-dark" th:text="${customer.address != null ? customer.address : 'N/A'}">address</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs for Purchase History & Payment History -->
+    <ul class="nav nav-pills mb-3" id="customerTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold" id="purchases-tab" data-bs-toggle="pill" data-bs-target="#purchases-pane" type="button" role="tab">
+                <i class="bi bi-bag-check me-1"></i> Sales / Order History (<span th:text="${sales != null ? sales.size() : 0}">0</span>)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="payments-tab" data-bs-toggle="pill" data-bs-target="#payments-pane" type="button" role="tab">
+                <i class="bi bi-cash-coin me-1"></i> Due Payment History (<span th:text="${payments != null ? payments.size() : 0}">0</span>)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="customerTabsContent">
+        <!-- Sales Pane -->
+        <div class="tab-pane fade show active" id="purchases-pane" role="tabpanel">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+                                <th>Due</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(sales)}">
+                                <td colspan="8" class="text-center py-4 text-muted">No sales orders found for this customer.</td>
+                            </tr>
+                            <tr th:each="s : ${sales}">
+                                <td><strong class="text-primary" th:text="${s.invoiceNo}">INV-001</strong></td>
+                                <td th:text="${#temporals.format(s.saleDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                <td><span class="badge bg-light text-dark border" th:text="${s.items != null ? s.items.size() : 0} + ' items'">Items</span></td>
+                                <td><strong th:text="'$' + ${#numbers.formatDecimal(s.totalAmount, 1, 2)}">$0.00</strong></td>
+                                <td th:text="'$' + ${#numbers.formatDecimal(s.paidAmount, 1, 2)}">$0.00</td>
+                                <td class="text-danger fw-bold" th:text="'$' + ${#numbers.formatDecimal(s.dueAmount, 1, 2)}">$0.00</td>
+                                <td>
+                                    <span th:if="${s.status.name() == 'COMPLETED'}" class="badge bg-success">COMPLETED</span>
+                                    <span th:if="${s.status.name() == 'PARTIALLY_RETURNED'}" class="badge bg-warning text-dark">PARTIAL RETURN</span>
+                                    <span th:if="${s.status.name() == 'RETURNED'}" class="badge bg-danger">RETURNED</span>
+                                </td>
+                                <td class="text-end">
+                                    <a th:href="@{'/sales/invoice/' + ${s.invoiceNo}}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-printer"></i> Invoice
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Pane -->
+        <div class="tab-pane fade" id="payments-pane" role="tabpanel">
+            <div class="card border-0 shadow-sm p-3">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount Paid</th>
+                                <th>Payment Method</th>
+                                <th>Reference</th>
+                                <th>Notes</th>
+                                <th>Received By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(payments)}">
+                                <td colspan="6" class="text-center py-4 text-muted">No customer payments recorded yet.</td>
+                            </tr>
+                            <tr th:each="pm : ${payments}">
+                                <td th:text="${#temporals.format(pm.paymentDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                <td><strong class="text-success" th:text="'$' + ${#numbers.formatDecimal(pm.amount, 1, 2)}">$0.00</strong></td>
+                                <td><span class="badge bg-secondary text-uppercase" th:text="${pm.paymentMethod}">CASH</span></td>
+                                <td th:text="${pm.reference != null ? pm.reference : '-'}">Ref</td>
+                                <td th:text="${pm.note != null ? pm.note : '-'}">Note</td>
+                                <td th:text="${pm.receivedBy != null ? pm.receivedBy.username : 'cashier'}">Cashier</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receive Payment Modal -->
+    <div class="modal fade" id="customerPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{'/customers/' + ${customer.id} + '/payment'}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Receive Customer Due Payment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Amount ($) <span class="text-danger">*</span></label>
+                            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" th:value="${currentDue.signum() > 0 ? currentDue : ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+                            <select name="paymentMethod" class="form-select" required>
+                                <option th:each="m : ${paymentMethods}" th:value="${m}" th:text="${m}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Receipt / Transaction Reference</label>
+                            <input type="text" name="reference" class="form-control" placeholder="Slip # / transaction ID">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Notes</label>
+                            <textarea name="note" class="form-control" rows="2" placeholder="Remarks..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-artisan">Confirm Payment Received</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

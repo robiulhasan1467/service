@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#inventory-history-content}, 'Inventory Transaction Ledger', 'inventory-history')}">
+<body>
+<div id="inventory-history-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Inventory Transaction Ledger</h2>
+            <p class="text-muted small mb-0">Immutable audit log tracking every incoming purchase, retail deduction, return, and recount adjustment.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/inventory/stock}" class="btn btn-outline-secondary">
+                <i class="bi bi-boxes me-1"></i> Stock Levels
+            </a>
+            <a th:href="@{/inventory/adjust}" class="btn btn-artisan">
+                <i class="bi bi-sliders me-1"></i> Stock Adjustment
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card border-0 shadow-sm p-3 mb-4">
+        <form method="get" th:action="@{/inventory/history}" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted mb-1">Product</label>
+                <select name="productId" class="form-select form-select-sm">
+                    <option value="">All Products</option>
+                    <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.sku} + ')'" th:selected="${p.id == productId}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">Movement Type</label>
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">All Movement Types</option>
+                    <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t == selectedType}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">From Date</label>
+                <input type="date" name="startDate" class="form-control form-control-sm" th:value="${startDate}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">To Date</label>
+                <input type="date" name="endDate" class="form-control form-control-sm" th:value="${endDate}">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-choco flex-fill">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <a th:href="@{/inventory/history}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Ledger Table -->
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Product</th>
+                        <th>Type</th>
+                        <th class="text-center">Previous Stock</th>
+                        <th class="text-center">Movement Qty</th>
+                        <th class="text-center">New Stock</th>
+                        <th>Reference</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${transactionPage.empty}">
+                        <td colspan="8" class="text-center py-4 text-muted">No inventory ledger transactions found.</td>
+                    </tr>
+                    <tr th:each="tx : ${transactionPage.content}">
+                        <td th:text="${#temporals.format(tx.transactionDate, 'yyyy-MM-dd HH:mm:ss')}">2026-10-05 10:00</td>
+                        <td>
+                            <strong th:text="${tx.product.name}">Product Name</strong>
+                            <small class="text-muted d-block" th:text="${tx.product.sku}">SKU</small>
+                        </td>
+                        <td>
+                            <span th:if="${tx.transactionType.name() == 'PURCHASE'}" class="badge bg-success">PURCHASE</span>
+                            <span th:if="${tx.transactionType.name() == 'SALE'}" class="badge bg-primary">SALE</span>
+                            <span th:if="${tx.transactionType.name() == 'SALE_RETURN'}" class="badge bg-info text-dark">SALE RETURN</span>
+                            <span th:if="${tx.transactionType.name() == 'DAMAGE'}" class="badge bg-danger">DAMAGE</span>
+                            <span th:if="${tx.transactionType.name() == 'ADJUSTMENT'}" class="badge bg-warning text-dark">ADJUSTMENT</span>
+                            <span th:if="${tx.transactionType.name() == 'OPENING_STOCK'}" class="badge bg-secondary">OPENING</span>
+                        </td>
+                        <td class="text-center text-muted" th:text="${tx.previousStock}">0</td>
+                        <td class="text-center fw-bold"
+                            th:classappend="${tx.transactionType.name() == 'SALE' || tx.transactionType.name() == 'DAMAGE'} ? 'text-danger' : 'text-success'"
+                            th:text="(${tx.transactionType.name() == 'SALE' || tx.transactionType.name() == 'DAMAGE'} ? '-' : '+') + ${tx.quantity}">+10</td>
+                        <td class="text-center fw-bold" th:text="${tx.newStock}">10</td>
+                        <td>
+                            <span class="small" th:text="${tx.reference}">INV-001</span>
+                            <small class="text-muted d-block text-truncate" style="max-width: 200px;" th:text="${tx.note}"></small>
+                        </td>
+                        <td th:text="${tx.user != null ? tx.user.username : 'system'}">system</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${transactionPage.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+            <span class="small text-muted" th:text="'Page ' + (${transactionPage.number} + 1) + ' of ' + ${transactionPage.totalPages}"></span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${transactionPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/inventory/history(page=${transactionPage.number - 1}, productId=${productId}, type=${selectedType}, startDate=${startDate}, endDate=${endDate})}">Previous</a>
+                </li>
+                <li class="page-item" th:classappend="${transactionPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/inventory/history(page=${transactionPage.number + 1}, productId=${productId}, type=${selectedType}, startDate=${startDate}, endDate=${endDate})}">Next</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

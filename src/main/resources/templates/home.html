@@ -1,0 +1,607 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:attr="data-theme=${theme}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JaHa - লাইভ শপিং বাংলাদেশ | ঘড়ি, মানিব্যাগ, সানগ্লাস, ফ্যাশন, চকোলেট ও লাইফস্টাইল কালেকশন">
+    <title>JaHa | লাইভ শপিং বাংলাদেশ - প্রিমিয়াম অনলাইন শপিং</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- JaHa Live Shopping CSS -->
+    <link rel="stylesheet" th:href="@{/css/liveshopping.css}">
+    <script th:replace="~{layout :: theme-init}"></script>
+</head>
+<body>
+
+    <!-- 1. Top Announcement & Hotline Bar -->
+    <div class="jaha-topbar">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <span><i class="bi bi-telephone-fill me-1 text-danger"></i> হটলাইন: <a th:href="'tel:' + ${hotlineIntl}" class="hotline-badge" th:text="${hotline}">09613-111333</a></span>
+                <span class="d-none d-md-inline text-secondary">|</span>
+                <span class="d-none d-md-inline"><i class="bi bi-truck me-1 text-warning"></i> সারাদেশে দ্রুত ক্যাশ অন ডেলিভারি</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a th:href="@{/order-track}"><i class="bi bi-geo-alt-fill me-1 text-info"></i> <span class="language-en">Track Order</span><span class="language-bn" hidden>অর্ডার ট্র্যাক করুন</span></a>
+                <span class="text-secondary">|</span>
+                <div th:if="${authenticated}" class="d-inline-flex align-items-center gap-2">
+                    <a th:href="@{/dashboard}" class="badge bg-danger text-white text-decoration-none px-2 py-1">
+                        <i class="bi bi-speedometer2 me-1"></i> ড্যাশবোর্ড (<span th:text="${username}">User</span>)
+                    </a>
+                    <form th:action="@{/logout}" method="post" class="d-inline m-0">
+                        <button type="submit" class="btn btn-link p-0 text-white-50 text-decoration-none small">লগআউট</button>
+                    </form>
+                </div>
+                <div th:unless="${authenticated}">
+                    <a th:href="@{/login}" class="text-white-50 small"><i class="bi bi-person-lock me-1"></i> স্টাফ লগইন</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Main Header (Logo, Search, Call & Cart) -->
+    <header class="jaha-main-header">
+        <div class="container">
+            <div class="row align-items-center gy-2">
+                <!-- JaHa Brand Logo -->
+                <div class="col-6 col-md-3">
+                    <a th:href="@{/}" class="d-inline-flex align-items-center text-decoration-none">
+                        <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" class="jaha-brand-logo">
+                    </a>
+                </div>
+
+                <!-- Live Shopping Search Bar with Category Select -->
+                <div class="col-12 col-md-6 order-3 order-md-2">
+                    <form th:action="@{/shop}" method="get" class="jaha-search-group shadow-sm">
+                        <select name="categoryId" class="jaha-search-category d-none d-sm-block">
+                            <option value="">সকল ক্যাটাগরি</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                        </select>
+                        <input type="text" name="q" class="jaha-search-input" placeholder="আপনার পছন্দের পণ্য সার্চ করুন (যেমন: ঘড়ি, ওয়ালেট, চকোলেট)..." required>
+                        <button type="submit" class="jaha-search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Call Hotline & Cart Preview -->
+                <div class="col-6 col-md-3 order-2 order-md-3 text-end d-flex align-items-center justify-content-end gap-3">
+                                        <button class="btn btn-sm btn-outline-dark" type="button" id="languageToggle" aria-label="Switch language to Bengali" aria-pressed="false"><i class="bi bi-translate me-1" aria-hidden="true"></i><span id="languageToggleLabel">বাংলা</span></button>
+                                        <div th:replace="~{layout :: theme-control}"></div>
+                    <div class="jaha-call-box d-none d-lg-flex text-start">
+                        <div class="call-icon">
+                            <i class="bi bi-telephone-outbound-fill"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.72rem; line-height: 1;">অর্ডার করতে কল করুন</small>
+                            <strong style="font-size: 0.92rem;" th:text="${hotline}">09613-111333</strong>
+                        </div>
+                    </div>
+                    <a th:href="@{/order-track}" class="btn btn-outline-dark rounded-pill px-3 py-2 btn-sm d-none d-sm-inline-flex align-items-center gap-1">
+                        <i class="bi bi-box-seam text-danger"></i>
+                        <span class="language-en">Tracking</span><span class="language-bn" hidden>ট্র্যাকিং</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. Sticky Categories & Mega Navigation -->
+    <nav class="jaha-nav-menu sticky-top">
+        <div class="container d-flex align-items-center justify-content-between overflow-x-auto py-1">
+            <div class="d-flex align-items-center gap-1 text-nowrap">
+                <a th:href="@{/shop}" class="category-dropdown-btn rounded-pill me-2">
+                    <i class="bi bi-grid-fill"></i>
+                    <span><span class="language-en">All Categories</span><span class="language-bn" hidden>সকল ক্যাটাগরি</span></span>
+                </a>
+                <a th:href="@{/}" class="nav-link active">
+                    <i class="bi bi-house-door-fill"></i> <span class="language-en">Home</span><span class="language-bn" hidden>হোম</span>
+                </a>
+                <a href="#flash-sale" class="nav-link text-warning fw-bold">
+                    <i class="bi bi-fire text-danger"></i> <span class="language-en">Flash Sale</span><span class="language-bn" hidden>ফ্ল্যাশ সেল</span> 🔥
+                </a>
+                <a th:href="@{/shop(categoryId=9)}" class="nav-link">
+                    <i class="bi bi-watch"></i> <span class="language-en">Watches</span><span class="language-bn" hidden>ঘড়ি</span>
+                </a>
+                <a th:href="@{/shop(categoryId=10)}" class="nav-link">
+                    <i class="bi bi-wallet2"></i> <span class="language-en">Wallets</span><span class="language-bn" hidden>মানিব্যাগ</span>
+                </a>
+                <a th:href="@{/shop(categoryId=11)}" class="nav-link">
+                    <i class="bi bi-eyeglasses"></i> <span class="language-en">Sunglasses</span><span class="language-bn" hidden>সানগ্লাস</span>
+                </a>
+                <a th:href="@{/shop(categoryId=12)}" class="nav-link">
+                    <i class="bi bi-person-standing"></i> <span class="language-en">Panjabi &amp; Fashion</span><span class="language-bn" hidden>পাঞ্জাবি ও ফ্যাশন</span>
+                </a>
+                <a th:href="@{/shop(categoryId=4)}" class="nav-link">
+                    <i class="bi bi-gift-fill text-danger"></i> <span class="language-en">Gift Boxes &amp; Chocolate</span><span class="language-bn" hidden>গিফট বক্স ও চকোলেট</span>
+                </a>
+                <a th:href="@{/shop(categoryId=13)}" class="nav-link">
+                    <i class="bi bi-headphones"></i> <span class="language-en">Gadgets</span><span class="language-bn" hidden>গ্যাজেট</span>
+                </a>
+            </div>
+            <div class="d-none d-xl-block">
+                <a th:href="@{/order-track}" class="nav-link text-white-50">
+                    <i class="bi bi-shield-check text-success"></i> ১০০% জেনুইন প্রোডাক্ট
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alerts Container -->
+    <div class="container mt-3" th:if="${successMessage != null or errorMessage != null}">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- 4. Hero Section & Promotional Banner Slider -->
+    <section class="container mt-3">
+        <div class="jaha-hero-wrapper">
+            <a th:href="@{/shop}">
+                <img th:src="@{/images/jaha_banner.jpg}" alt="JaHa Live Shopping Deals" class="jaha-hero-img">
+            </a>
+        </div>
+
+        <!-- Live Shopping Value Props Strip -->
+        <div class="jaha-value-strip">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <div>
+                            <h5 class="value-title">সারাদেশে হোম ডেলিভারি</h5>
+                            <p class="value-sub">ঢাকা ৳৬০ | ঢাকার বাইরে ৳১২০</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <div>
+                            <h5 class="value-title">ক্যাশ অন ডেলিভারি</h5>
+                            <p class="value-sub">পণ্য পেয়ে টাকা পরিশোধ করুন</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-patch-check-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="value-title">১০০% অরিজিনাল পণ্য</h5>
+                            <p class="value-sub">সেরা কোয়ালিটি গ্যারান্টি</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="value-item">
+                        <div class="value-icon">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <div>
+                            <h5 class="value-title">সহজ রিপ্লেসমেন্ট</h5>
+                            <p class="value-sub">৩ দিনের সহজ রিটার্ন পলিসি</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Category Quick Circles -->
+    <section class="container my-5">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold fs-4 mb-1">জনপ্রিয় ক্যাটাগরি সমূহ</h3>
+            <p class="text-muted small">আপনার পছন্দের সেরা প্রোডাক্টটি বেছে নিন</p>
+        </div>
+        <div class="row g-3 justify-content-center">
+            <div class="col-4 col-sm-3 col-md-2" th:each="cat : ${categories}" th:if="${cat.name == 'Watches' or cat.name == 'Wallets & Leather' or cat.name == 'Sunglasses' or cat.name == 'Men''s Fashion' or cat.name == 'Gift Box' or cat.name == 'Smart Gadgets'}">
+                <a th:href="@{/shop(categoryId=${cat.id})}" class="category-circle-item">
+                    <img th:if="${cat.name == 'Watches'}" src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=200&auto=format&fit=crop&q=80" class="category-circle-img" alt="Watches">
+                    <img th:if="${cat.name == 'Wallets & Leather'}" src="https://images.unsplash.com/photo-1627123424574-724758594e93?w=200&auto=format&fit=crop&q=80" class="category-circle-img" alt="Wallets">
+                    <img th:if="${cat.name == 'Sunglasses'}" src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=200&auto=format&fit=crop&q=80" class="category-circle-img" alt="Sunglasses">
+                    <img th:if="${cat.name == 'Men''s Fashion'}" src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=200&auto=format&fit=crop&q=80" class="category-circle-img" alt="Fashion">
+                    <img th:if="${cat.name == 'Gift Box'}" src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200&auto=format&fit=crop&q=80" class="category-circle-img" alt="Gifts">
+                    <img th:if="${cat.name == 'Smart Gadgets'}" src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&auto=format&fit=crop&q=80" class="category-circle-img" alt="Gadgets">
+                    <div class="category-circle-title" th:text="${cat.name}">Category</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Flash Sale Deals Section with Live Countdown Timer -->
+    <section class="container my-5" id="flash-sale">
+        <div class="flash-sale-header">
+            <div class="d-flex align-items-center gap-3">
+                <span class="fs-4">🔥</span>
+                <div>
+                    <h3 class="fw-bold mb-0 text-white fs-4">ফ্ল্যাশ সেল অফার (Flash Sale Deals)</h3>
+                    <small class="text-white-50">সীমিত সময়ের বিশেষ মূল্যছাড় অফার</small>
+                </div>
+            </div>
+            <!-- Live Timer -->
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-white-50 small me-1 d-none d-sm-inline">অফারের বাকি সময়:</span>
+                <div class="timer-box">
+                    <div class="timer-unit" id="timerHours">08</div>
+                    <span class="timer-colon">:</span>
+                    <div class="timer-unit" id="timerMins">45</div>
+                    <span class="timer-colon">:</span>
+                    <div class="timer-unit" id="timerSecs">20</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 p-3 bg-white border border-top-0 rounded-bottom-4 shadow-sm">
+            <div class="col-6 col-md-4 col-lg-3" th:each="prod, iter : ${flashSales}" th:if="${iter.index < 8}">
+                <div class="jaha-product-card">
+                    <div class="product-img-wrap">
+                        <span class="discount-badge" th:if="${prod.discountPrice != null and prod.discountPrice < prod.sellingPrice}">
+                            <i class="bi bi-tag-fill me-1"></i>
+                            <span th:text="${#numbers.formatDecimal((prod.sellingPrice - prod.discountPrice) / prod.sellingPrice * 100, 0, 0)} + '% ছাড়'">25% ছাড়</span>
+                        </span>
+                        <span class="stock-pill">
+                            <i class="bi bi-lightning-charge-fill text-warning"></i> ইন স্টক
+                        </span>
+                        <a th:href="@{'/product/' + ${prod.id}}">
+                            <img th:src="${prod.imagePath != null ? prod.imagePath : '/images/jaha_logo_transparent.png'}" th:alt="${prod.name}" loading="lazy">
+                        </a>
+                    </div>
+                    <div class="product-info-wrap">
+                        <span class="product-category-tag" th:text="${prod.category != null ? prod.category.name : 'JaHa Collection'}">Category</span>
+                        <h4 class="product-title">
+                            <a th:href="@{'/product/' + ${prod.id}}" th:text="${prod.name}">Product Name</a>
+                        </h4>
+                        <div class="price-rating-row">
+                            <div>
+                                <span class="current-price" th:text="'৳ ' + ${#numbers.formatDecimal(prod.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')}">৳ 1,250</span>
+                                <span class="old-price" th:if="${prod.discountPrice != null and prod.discountPrice < prod.sellingPrice}" th:text="'৳ ' + ${#numbers.formatDecimal(prod.sellingPrice, 0, 'COMMA', 0, 'POINT')}">৳ 1,600</span>
+                            </div>
+                            <div class="stars-rating">
+                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                            </div>
+                        </div>
+
+                        <!-- 1-Click Order Button & Add to Cart -->
+                        <div class="product-card-actions">
+                            <button type="button" 
+                                    class="btn-order-now btn-quick-order-trigger"
+                                    th:data-product-id="${prod.id}"
+                                    th:data-product-name="${prod.name}"
+                                    th:data-product-price="${prod.getEffectivePrice()}"
+                                    th:data-product-img="${prod.imagePath}">
+                                <i class="bi bi-bag-check-fill"></i>
+                                <span>অর্ডার করুন</span>
+                            </button>
+                            <a th:href="@{'/product/' + ${prod.id}}" class="btn-add-cart-icon" title="বিস্তারিত দেখুন">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. All Collections / Live Shopping Showcase -->
+    <section class="container my-5">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold fs-4 mb-0">সেরা ট্রেন্ডিং কালেকশন (Trending Products)</h3>
+                <small class="text-muted">JaHa স্পেশাল প্রিমিয়াম লাইফস্টাইল ও গিফট আইটেম</small>
+            </div>
+            <a th:href="@{/shop}" class="btn btn-outline-danger rounded-pill px-4 mt-2 mt-sm-0">
+                সবগুলো দেখুন <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg-3" th:each="prod : ${allProducts}">
+                <div class="jaha-product-card">
+                    <div class="product-img-wrap">
+                        <span class="discount-badge" th:if="${prod.discountPrice != null and prod.discountPrice < prod.sellingPrice}">
+                            <i class="bi bi-tag-fill me-1"></i>
+                            <span th:text="${#numbers.formatDecimal((prod.sellingPrice - prod.discountPrice) / prod.sellingPrice * 100, 0, 0)} + '% ছাড়'">20% ছাড়</span>
+                        </span>
+                        <a th:href="@{'/product/' + ${prod.id}}">
+                            <img th:src="${prod.imagePath != null ? prod.imagePath : '/images/jaha_logo_transparent.png'}" th:alt="${prod.name}" loading="lazy">
+                        </a>
+                    </div>
+                    <div class="product-info-wrap">
+                        <span class="product-category-tag" th:text="${prod.category != null ? prod.category.name : 'Lifestyle'}">Category</span>
+                        <h4 class="product-title">
+                            <a th:href="@{'/product/' + ${prod.id}}" th:text="${prod.name}">Product Name</a>
+                        </h4>
+                        <div class="price-rating-row">
+                            <div>
+                                <span class="current-price" th:text="'৳ ' + ${#numbers.formatDecimal(prod.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')}">৳ 850</span>
+                                <span class="old-price" th:if="${prod.discountPrice != null and prod.discountPrice < prod.sellingPrice}" th:text="'৳ ' + ${#numbers.formatDecimal(prod.sellingPrice, 0, 'COMMA', 0, 'POINT')}">৳ 1,100</span>
+                            </div>
+                            <div class="stars-rating">
+                                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i>
+                            </div>
+                        </div>
+
+                        <!-- 1-Click Order Button & Add to Cart -->
+                        <div class="product-card-actions">
+                            <button type="button" 
+                                    class="btn-order-now btn-quick-order-trigger"
+                                    th:data-product-id="${prod.id}"
+                                    th:data-product-name="${prod.name}"
+                                    th:data-product-price="${prod.getEffectivePrice()}"
+                                    th:data-product-img="${prod.imagePath}">
+                                <i class="bi bi-bag-check-fill"></i>
+                                <span>অর্ডার করুন</span>
+                            </button>
+                            <a th:href="@{'/product/' + ${prod.id}}" class="btn-add-cart-icon" title="বিস্তারিত দেখুন">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. Customer Trust & Order Instruction Banner -->
+    <section class="container my-5">
+        <div class="card border-0 rounded-4 p-4 p-md-5 text-white" style="background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 100%);">
+            <div class="row align-items-center gy-4">
+                <div class="col-lg-8">
+                    <span class="badge bg-danger px-3 py-2 rounded-pill mb-3">JaHa লাইভ শপিং সুবিধা</span>
+                    <h2 class="display-6 fw-bold mb-3">সহজ ও দ্রুত অনলাইনে অর্ডার করুন</h2>
+                    <p class="text-white-50 fs-5 mb-4">
+                        কোনো কার্ডের ঝামেলা ছাড়াই সারাদেশে সরাসরি ক্যাশ অন ডেলিভারিতে অর্ডার করুন। 
+                        ডেলিভারি ম্যানের কাছ থেকে প্রোডাক্ট দেখে ও বুঝে মূল্য পরিশোধ করতে পারবেন।
+                    </p>
+                    <div class="d-flex flex-wrap gap-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            <span>পণ্য হাতে পেয়ে পেমেন্ট</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            <span>দ্রুততম কুরিয়ার হোম ডেলিভারি</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                            <span>২৪/৭ কল ও হোয়াটসঅ্যাপ সাপোর্ট</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center text-lg-end">
+                    <a th:href="'https://wa.me/' + ${whatsappNumber}" target="_blank" class="btn btn-success btn-lg rounded-pill px-4 py-3 fw-bold shadow">
+                        <i class="bi bi-whatsapp me-2 fs-5"></i> হোয়াটসঅ্যাপে অর্ডার করুন
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. Instant One-Click Order Modal ("অর্ডার করুন" Modal) -->
+    <div class="modal fade modal-jaha" id="quickOrderModal" tabindex="-1" aria-labelledby="quickOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quickOrderModalLabel">
+                        <i class="bi bi-bag-check-fill text-danger"></i>
+                        <span>অর্ডার ফর্মটি পূরণ করুন</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Form submitting to /quick-order -->
+                    <form th:action="@{/quick-order}" method="post" id="quickOrderForm">
+                        <input type="hidden" name="productId" id="modalProductId">
+
+                        <!-- Selected Product Summary Box -->
+                        <div class="order-summary-box">
+                            <img id="modalProductImg" src="/images/jaha_logo_transparent.png" alt="Product" class="order-summary-img">
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1" id="modalProductName">পণ্যটির নাম</h6>
+                                <div class="text-danger fw-bold fs-5 mb-2" id="modalProductPrice">৳ 0</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small class="text-muted">পরিমাণ:</small>
+                                    <div class="quantity-counter">
+                                        <button type="button" id="modalQtyMinus">-</button>
+                                        <input type="number" name="quantity" id="modalQtyInput" value="1" min="1" readonly>
+                                        <button type="button" id="modalQtyPlus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Inputs -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">
+                                আপনার সম্পূর্ণ নাম লিখুন <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="customerName" class="form-control form-control-lg" placeholder="যেমন: মোঃ সাকিব হাসান" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">
+                                আপনার সচল মোবাইল নম্বর লিখুন <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" name="customerPhone" class="form-control form-control-lg" placeholder="যেমন: 017XXXXXXXX" pattern="[0-9]{11}" required>
+                            <small class="text-muted" style="font-size: 0.75rem;">১১ ডিজিটের সঠিক ফোন নম্বর দিন (ডেলিভারির সময় কল দেওয়া হবে)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">
+                                আপনার সম্পূর্ণ ডেলিভারি ঠিকানা <span class="text-danger">*</span>
+                            </label>
+                            <textarea name="deliveryAddress" class="form-control" rows="2" placeholder="বাসা/রোড নম্বর, এলাকা, থানা ও জেলার নাম লিখুন..." required></textarea>
+                        </div>
+
+                        <!-- Delivery Zone Selector -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">ডেলিভারি এরিয়া নির্বাচন করুন <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="zone-option-card active w-100" for="zoneDhaka">
+                                        <div>
+                                            <input type="radio" name="deliveryZone" id="zoneDhaka" value="DHAKA" checked class="form-check-input me-1">
+                                            <span class="fw-semibold small">ঢাকার ভিতরে</span>
+                                        </div>
+                                        <span class="badge bg-danger">৳ ৬০</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <label class="zone-option-card w-100" for="zoneOutside">
+                                        <div>
+                                            <input type="radio" name="deliveryZone" id="zoneOutside" value="OUTSIDE" class="form-check-input me-1">
+                                            <span class="fw-semibold small">ঢাকার বাইরে</span>
+                                        </div>
+                                        <span class="badge bg-danger">৳ ১২০</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">পেমেন্ট মেথড</label>
+                            <div class="border rounded-3 p-2 bg-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="radio" name="paymentMethod" value="CASH" checked class="form-check-input">
+                                    <span class="small fw-bold">ক্যাশ অন ডেলিভারি (পণ্য হাতে পেয়ে টাকা দিন)</span>
+                                </div>
+                                <span class="text-success small fw-bold"><i class="bi bi-shield-check"></i> নিরাপদ</span>
+                            </div>
+                        </div>
+
+                        <!-- Live Cost Breakdown -->
+                        <div class="order-cost-breakdown">
+                            <div class="breakdown-row">
+                                <span>পণ্যের মূল্য (Subtotal):</span>
+                                <span id="modalSubtotal" class="fw-bold">৳ 0</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span>ডেলিভারি চার্জ (Delivery):</span>
+                                <span id="modalDeliveryFee" class="fw-bold">৳ 60</span>
+                            </div>
+                            <div class="breakdown-row total-row">
+                                <span>সর্বমোট প্রদেয় (Grand Total):</span>
+                                <span id="modalGrandTotal">৳ 0</span>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Order Submit Button -->
+                        <button type="submit" class="btn-confirm-order" id="modalSubmitBtn">
+                            <i class="bi bi-bag-check-fill me-2"></i>
+                            <span id="modalSubmitBtnText">অর্ডার কনফার্ম করুন</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. Floating WhatsApp and Call Helpline -->
+    <div class="jaha-floating-contact">
+        <a th:href="'https://wa.me/' + ${whatsappNumber}" target="_blank" class="floating-btn floating-whatsapp" title="WhatsApp এ মেসেজ দিন">
+            <i class="bi bi-whatsapp"></i>
+        </a>
+        <a th:href="'tel:' + ${hotlineIntl}" class="floating-btn floating-call" title="হটলাইনে কল করুন">
+            <i class="bi bi-telephone-fill"></i>
+        </a>
+    </div>
+
+    <!-- 11. LiveShopping BD Style Footer -->
+    <footer class="jaha-footer">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Brand Info -->
+                <div class="col-lg-4">
+                    <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" style="height: 50px;" class="jaha-brand-logo mb-3">
+                    <p class="small text-white-50">
+                        JaHa হলো বাংলাদেশের বিশ্বস্ত অনলাইন লাইভ শপিং প্ল্যাটফর্ম। আমরা প্রিমিয়াম কোয়ালিটির ঘড়ি, মানিব্যাগ, সানগ্লাস, পুরুষদের পোশাক ও লাক্সারি চকোলেট গিফট কালেকশন সমগ্র বাংলাদেশে নির্ভরযোগ্যতার সাথে সরবরাহ করি।
+                    </p>
+                    <div class="d-flex gap-3 fs-5">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                        <a th:href="'https://wa.me/' + ${whatsappNumber}" target="_blank"><i class="bi bi-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <!-- Customer Care -->
+                <div class="col-6 col-lg-2">
+                    <h5 class="footer-heading">কাস্টমার কেয়ার</h5>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                        <li><a th:href="@{/order-track}"><i class="bi bi-chevron-right me-1 text-danger"></i> অর্ডার ট্র্যাক করুন</a></li>
+                        <li><a th:href="@{/shop}"><i class="bi bi-chevron-right me-1 text-danger"></i> সকল পণ্য</a></li>
+                        <li><a href="#flash-sale"><i class="bi bi-chevron-right me-1 text-danger"></i> ফ্ল্যাশ সেল</a></li>
+                        <li><a href="#"><i class="bi bi-chevron-right me-1 text-danger"></i> রিটার্ন ও পলিসি</a></li>
+                    </ul>
+                </div>
+
+                <!-- Categories -->
+                <div class="col-6 col-lg-3">
+                    <h5 class="footer-heading">টপ ক্যাটাগরি</h5>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                        <li><a th:href="@{/shop(categoryId=9)}"><i class="bi bi-chevron-right me-1 text-danger"></i> লাক্সারি ঘড়ি (Watches)</a></li>
+                        <li><a th:href="@{/shop(categoryId=10)}"><i class="bi bi-chevron-right me-1 text-danger"></i> লেদার মানিব্যাগ (Wallets)</a></li>
+                        <li><a th:href="@{/shop(categoryId=11)}"><i class="bi bi-chevron-right me-1 text-danger"></i> সানগ্লাস (Sunglasses)</a></li>
+                        <li><a th:href="@{/shop(categoryId=12)}"><i class="bi bi-chevron-right me-1 text-danger"></i> প্রিমিয়াম পাঞ্জাবি (Panjabi)</a></li>
+                        <li><a th:href="@{/shop(categoryId=4)}"><i class="bi bi-chevron-right me-1 text-danger"></i> চকোলেট গিফট বক্স (Gift Box)</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact & Support -->
+                <div class="col-lg-3">
+                    <h5 class="footer-heading">যোগাযোগ ও ঠিকানা</h5>
+                    <ul class="list-unstyled small text-white-50 d-flex flex-column gap-2 mb-3">
+                        <li><i class="bi bi-geo-alt-fill text-danger me-2"></i> ঢাকা, বাংলাদেশ</li>
+                        <li><i class="bi bi-telephone-fill text-danger me-2"></i> <span th:text="${hotline}">09613-111333</span></li>
+                        <li><i class="bi bi-whatsapp text-success me-2"></i> <span th:text="${hotline}">09613-111333</span></li>
+                        <li><i class="bi bi-envelope-fill text-danger me-2"></i> support@jaha.com.bd</li>
+                    </ul>
+                    <div>
+                        <small class="text-white-50 d-block mb-1">পেমেন্ট মেথড:</small>
+                        <span class="badge bg-secondary me-1">Cash on Delivery</span>
+                        <span class="badge bg-danger me-1">bKash</span>
+                        <span class="badge bg-warning text-dark">Nagad</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Copyright & Discreet Staff Login -->
+            <div class="footer-bottom-strip d-flex flex-wrap justify-content-between align-items-center">
+                <p class="mb-0 text-white-50 small">&copy; 2026 JaHa - Live Shopping Bangladesh. সর্বস্বত্ব সংরক্ষিত।</p>
+                <div class="small">
+                    <a th:href="@{/login}" class="text-white-50 text-decoration-none">
+                        <i class="bi bi-shield-lock me-1"></i> কর্মকর্তা লগইন (Admin / Staff)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JaHa Live Shopping JS -->
+    <script th:src="@{/js/liveshopping.js}"></script>
+    <script th:replace="~{layout :: common-script}"></script>
+</body>
+</html>

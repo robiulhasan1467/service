@@ -1,0 +1,298 @@
+<html lang="bn" xmlns:th="http://www.thymeleaf.org" th:attr="data-theme=${theme}">
+<!DOCTYPE html>
+<html lang="bn" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JaHa Admin Portal | অ্যাডমিন লগইন</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- JaHa Live Shopping CSS -->
+    <link rel="stylesheet" th:href="@{/css/liveshopping.css}">
+        <script th:replace="~{layout :: theme-init}"></script>
+    <style>
+        body {
+            background: #f8f7f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #111114;
+            font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
+        }
+        .login-card-jaha {
+            background: #ffffff;
+            color: #111114;
+            border-radius: 12px;
+            box-shadow: 0 12px 36px rgba(17, 17, 20, 0.08);
+            border: 1px solid #e7e3e7;
+            overflow: hidden;
+        }
+        .login-left-banner {
+            background: #151519;
+            color: #ffffff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 3px solid #efa0c4;
+        }
+        .feature-item-pill {
+            background: #1b1b20;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border-left: 2px solid #efa0c4;
+        }
+        .credential-chip {
+            background: #f8f7f9;
+            border: 1px solid #e7e3e7;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .credential-chip:hover {
+            background: #efa0c4;
+            color: #111114;
+            border-color: #d96f9f;
+        }
+        .form-control {
+            border-color: #e7e3e7;
+            border-radius: 9px;
+        }
+        .form-control:focus {
+            border-color: #d96f9f;
+            box-shadow: 0 0 0 3px rgba(239, 160, 196, 0.2);
+        }
+        .btn-danger {
+            color: #171116;
+            background: #efa0c4;
+            border-color: #efa0c4;
+        }
+        .btn-danger:hover,
+        .btn-danger:focus-visible {
+            color: #171116;
+            background: #d96f9f;
+            border-color: #d96f9f;
+        }
+        .login-footer {
+            color: #6f6b72;
+            border-color: #e7e3e7 !important;
+        }
+        .login-brand-logo {
+            filter: url('/images/jaha-logo-light-filter.svg#light-letters');
+        }
+        .login-left-banner .login-brand-logo {
+            filter: none;
+        }
+        html[data-theme="dark"] body {
+            background: #0b0b0d;
+            color: #f7f5f7;
+        }
+        html[data-theme="dark"] .login-card-jaha {
+            color: #f7f5f7;
+            background: #151519;
+            border-color: #29262c;
+        }
+        html[data-theme="dark"] .login-card-jaha .text-dark,
+        html[data-theme="dark"] .login-card-jaha .form-label {
+            color: #f7f5f7 !important;
+        }
+        html[data-theme="dark"] .login-card-jaha .text-muted {
+            color: #a8a3aa !important;
+        }
+        html[data-theme="dark"] .credential-chip,
+        html[data-theme="dark"] .form-control,
+        html[data-theme="dark"] .input-group-text {
+            color: #f7f5f7;
+            background: #1b1b20;
+            border-color: #29262c;
+        }
+        html[data-theme="dark"] .login-brand-logo {
+            filter: none;
+        }
+        @media (prefers-color-scheme: dark) {
+            html[data-theme="system"] body {
+                background: #0b0b0d;
+                color: #f7f5f7;
+            }
+            html[data-theme="system"] .login-card-jaha {
+                color: #f7f5f7;
+                background: #151519;
+                border-color: #29262c;
+            }
+            html[data-theme="system"] .login-card-jaha .text-dark,
+            html[data-theme="system"] .login-card-jaha .form-label {
+                color: #f7f5f7 !important;
+            }
+            html[data-theme="system"] .login-card-jaha .text-muted {
+                color: #a8a3aa !important;
+            }
+            html[data-theme="system"] .credential-chip,
+            html[data-theme="system"] .form-control,
+            html[data-theme="system"] .input-group-text {
+                color: #f7f5f7;
+                background: #1b1b20;
+                border-color: #29262c;
+            }
+            html[data-theme="system"] .login-left-banner .login-brand-logo {
+                filter: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Minimal Header -->
+    <nav class="py-3 px-4 border-bottom border-secondary border-opacity-25">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a th:href="@{/}" class="d-flex align-items-center gap-2 text-decoration-none">
+                <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" class="login-brand-logo" style="height: 38px;">
+                <span class="badge bg-danger">Admin Portal</span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+            <div th:replace="~{layout :: theme-control}"></div>
+            <a th:href="@{/}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                <i class="bi bi-shop-window me-1"></i> লাইভ স্টোরে ফিরে যান
+            </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Login Content -->
+    <main class="container my-auto py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="login-card-jaha">
+                    <div class="row g-0">
+                        <!-- Left Panel: What Admin Controls -->
+                        <div class="col-lg-5 login-left-banner d-none d-lg-flex">
+                            <div>
+                                <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" class="login-brand-logo mb-4" style="height: 48px;">
+                                <h3 class="fw-bold mb-2">JaHa কন্ট্রোল প্যানেল</h3>
+                                <p class="text-white-50 small mb-4">আপনার ইকমার্স ব্যবসা এক জায়গায় নিয়ন্ত্রণ করুন:</p>
+
+                                <div class="feature-item-pill">
+                                    <div class="fw-bold fs-6"><i class="bi bi-box-seam me-2 text-danger"></i>পণ্য পোস্ট ও পরিচালনা</div>
+                                    <small class="text-white-50">নতুন পণ্য যোগ করুন, দাম, স্টক ও ছবি পরিবর্তন করুন</small>
+                                </div>
+
+                                <div class="feature-item-pill">
+                                    <div class="fw-bold fs-6"><i class="bi bi-truck me-2 text-warning"></i>অর্ডার ও ডেলিভারি নিয়ন্ত্রণ</div>
+                                    <small class="text-white-50">কুরিয়ার ট্র্যাকিং ও ডেলিভারি স্ট্যাটাস আপডেট করুন</small>
+                                </div>
+
+                                <div class="feature-item-pill">
+                                    <div class="fw-bold fs-6"><i class="bi bi-graph-up-arrow me-2 text-success"></i>সেলস অ্যাকাউন্টিং ও লাভ</div>
+                                    <small class="text-white-50">মোট বিক্রয়, খরচ, বকেয়া ও দৈনিক নিট মুনাফা দেখুন</small>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top border-secondary border-opacity-50">
+                                <small class="text-white-50"><i class="bi bi-shield-lock-fill text-danger me-1"></i> স্প্রিং সিকিউরিটি দ্বারা সম্পূর্ণ সুরক্ষিত</small>
+                            </div>
+                        </div>
+
+                        <!-- Right Panel: Login Form -->
+                        <div class="col-lg-7 p-4 p-md-5">
+                            <div class="mb-4">
+                                <h3 class="fw-bold mb-1 text-dark">অ্যাডমিন প্রবেশদ্বার</h3>
+                                <p class="text-muted small">সিস্টেম ম্যানেজমেন্ট পোর্টালে লগইন করতে ক্রেডেনশিয়াল লিখুন</p>
+                            </div>
+
+                            <!-- Alert Messages -->
+                            <div th:if="${param.error}" class="alert alert-danger py-2 small d-flex align-items-center mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                                <span>ভুল ইউজারনেম অথবা পাসওয়ার্ড দেওয়া হয়েছে। অনুগ্রহ করে সঠিক তথ্য দিন।</span>
+                            </div>
+
+                            <div th:if="${param.logout}" class="alert alert-success py-2 small d-flex align-items-center mb-3">
+                                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                <span>আপনি সফলভাবে লগআউট হয়েছেন।</span>
+                            </div>
+
+                            <!-- Form -->
+                            <form th:action="@{/login}" method="post" id="adminLoginForm">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-dark">
+                                        <i class="bi bi-person-fill text-danger me-1"></i> ইউজারনেম (Username)
+                                    </label>
+                                    <input type="text" name="username" id="loginUsername" class="form-control form-control-lg" placeholder="e.g. admin" required autofocus>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small text-dark">
+                                        <i class="bi bi-key-fill text-danger me-1"></i> পাসওয়ার্ড (Password)
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password" name="password" id="loginPassword" class="form-control form-control-lg" placeholder="পাসওয়ার্ড লিখুন" required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-danger btn-lg fw-bold rounded-3 shadow">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i> অ্যাডমিন লগইন করুন
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Quick One-Click Credentials Helper -->
+                            <div class="mt-4 pt-3 border-top">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <small class="fw-bold text-muted"><i class="bi bi-magic me-1"></i> এক-ক্লিকে টেস্ট ক্রেডেনশিয়াল পূরণ করুন:</small>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="credential-chip" onclick="fillCreds('admin', 'Admin@123')">
+                                        👑 <strong>Admin</strong> (admin / Admin@123)
+                                    </button>
+                                    <button type="button" class="credential-chip" onclick="fillCreds('manager', 'Manager@123')">
+                                        💼 <strong>Manager</strong> (manager / Manager@123)
+                                    </button>
+                                    <button type="button" class="credential-chip" onclick="fillCreds('cashier', 'Cashier@123')">
+                                        🛒 <strong>Cashier</strong> (cashier / Cashier@123)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="login-footer py-3 text-center border-top mt-auto">
+        <small>&copy; 2026 JaHa - Live Shopping Bangladesh &bull; সর্বস্বত্ব সংরক্ষিত</small>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script th:replace="~{layout :: common-script}"></script>
+    <script>
+        function fillCreds(u, p) {
+            document.getElementById('loginUsername').value = u;
+            document.getElementById('loginPassword').value = p;
+        }
+
+        document.getElementById('togglePasswordBtn').addEventListener('click', function() {
+            const passInput = document.getElementById('loginPassword');
+            const icon = this.querySelector('i');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                passInput.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+    </script>
+</body>
+</html>

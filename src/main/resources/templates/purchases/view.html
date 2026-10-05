@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#purchase-view-content}, 'Purchase Order Details', 'purchases')}">
+<body>
+<div id="purchase-view-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1" th:text="'Purchase Order #' + ${purchase.invoiceNo}">Purchase Order</h2>
+            <p class="text-muted small mb-0">Supplier invoice details, incoming product batch, and inventory updates.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/purchases}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Order List
+            </a>
+            <form th:if="${purchase.status.name() == 'CONFIRMED'}" th:action="@{'/purchases/cancel/' + ${purchase.id}}" method="post" onsubmit="return confirm('Cancel this purchase order? This will deduct the replenished stock.');">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-x-circle me-1"></i> Cancel & Reverse Stock
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="max-width: 800px; margin: 0 auto;">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 flex-wrap gap-2">
+            <div>
+                <h4 class="fw-bold mb-0 text-choco" th:text="${purchase.invoiceNo}">PUR-001</h4>
+                <small class="text-muted" th:text="'Date: ' + ${#temporals.format(purchase.purchaseDate, 'yyyy-MM-dd HH:mm')}"></small>
+            </div>
+            <div>
+                <span th:if="${purchase.status.name() == 'CONFIRMED'}" class="badge bg-success fs-6">CONFIRMED</span>
+                <span th:if="${purchase.status.name() == 'CANCELLED'}" class="badge bg-secondary fs-6">CANCELLED</span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4 small">
+            <div class="col-6">
+                <span class="text-muted d-block">Supplier Details:</span>
+                <strong class="fs-6 text-dark" th:text="${purchase.supplier.name}">Supplier</strong>
+                <div class="text-muted" th:text="${purchase.supplier.companyName}">Company</div>
+                <div class="text-muted" th:text="${purchase.supplier.phone}">Phone</div>
+            </div>
+            <div class="col-6 text-end">
+                <span class="text-muted d-block">Recorded By:</span>
+                <strong th:text="${purchase.creator != null ? purchase.creator.fullName : 'system'}">Admin</strong>
+                <span class="text-muted d-block mt-2">Notes:</span>
+                <div class="text-muted" th:text="${purchase.notes != null ? purchase.notes : 'None'}">Notes</div>
+            </div>
+        </div>
+
+        <h6 class="fw-bold mb-2">Purchased Products</h6>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-sm align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Product</th>
+                        <th class="text-center">Quantity</th>
+                        <th class="text-end">Unit Cost</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="it, iter : ${purchase.items}">
+                        <td th:text="${iter.count}">1</td>
+                        <td>
+                            <strong th:text="${it.product.name}">Product</strong>
+                            <small class="text-muted d-block" th:text="${it.product.sku}">SKU</small>
+                        </td>
+                        <td class="text-center" th:text="${it.quantity}">10</td>
+                        <td class="text-end" th:text="'$' + ${#numbers.formatDecimal(it.unitPrice, 1, 2)}">$0.00</td>
+                        <td class="text-end fw-bold" th:text="'$' + ${#numbers.formatDecimal(it.totalPrice, 1, 2)}">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row justify-content-end">
+            <div class="col-sm-5">
+                <div class="p-3 bg-light rounded border">
+                    <div class="d-flex justify-content-between mb-1 small">
+                        <span>Total Cost:</span>
+                        <strong th:text="'$' + ${#numbers.formatDecimal(purchase.totalAmount, 1, 2)}">$0.00</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 small">
+                        <span>Paid:</span>
+                        <span th:text="'$' + ${#numbers.formatDecimal(purchase.paidAmount, 1, 2)}">$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-1 small fw-bold">
+                        <span>Balance Due:</span>
+                        <span class="text-danger" th:text="'$' + ${#numbers.formatDecimal(purchase.dueAmount, 1, 2)}">$0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

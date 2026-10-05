@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#return-view-content}, 'Sales Return Voucher', 'sales-return')}">
+<body>
+<div id="return-view-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1" th:text="'Return Voucher #' + ${saleReturn.returnNo}">Return Voucher</h2>
+            <p class="text-muted small mb-0">Reversal voucher verifying customer refund and inventory adjustment.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/sales/returns}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Return List
+            </a>
+            <button class="btn btn-artisan" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print Voucher
+            </button>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="max-width: 720px; margin: 0 auto;">
+        <div class="border-bottom pb-3 mb-3 text-center">
+            <span class="fs-2">🍫</span>
+            <h4 class="fw-bold mb-1 text-choco">La Maison du Chocolat</h4>
+            <p class="text-muted small mb-0">Customer Sales Return & Restocking Receipt</p>
+        </div>
+
+        <div class="row g-3 mb-4 small">
+            <div class="col-6">
+                <span class="text-muted d-block">Return Voucher #:</span>
+                <strong class="text-danger fs-6" th:text="${saleReturn.returnNo}">RET-001</strong>
+                <span class="text-muted d-block mt-2">Original Sales Invoice:</span>
+                <a th:href="@{'/sales/invoice/' + ${saleReturn.sale.invoiceNo}}" class="fw-bold" th:text="${saleReturn.sale.invoiceNo}">INV-001</a>
+            </div>
+            <div class="col-6 text-end">
+                <span class="text-muted d-block">Return Date:</span>
+                <strong th:text="${#temporals.format(saleReturn.returnDate, 'yyyy-MM-dd HH:mm')}">Date</strong>
+                <span class="text-muted d-block mt-2">Processed By:</span>
+                <strong th:text="${saleReturn.processedBy != null ? saleReturn.processedBy.fullName : 'Staff'}">Staff</strong>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <span class="text-muted small d-block">Reason:</span>
+            <div class="p-2 rounded bg-light border fst-italic" th:text="${saleReturn.reason}">Customer returned items</div>
+        </div>
+
+        <h6 class="fw-bold mb-2">Restocked Items</h6>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-sm align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th class="text-center">Returned Qty</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Refund Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="it : ${saleReturn.items}">
+                        <td th:text="${it.product.name}">Product Name</td>
+                        <td class="text-center fw-bold" th:text="${it.quantity}">1</td>
+                        <td class="text-end" th:text="'$' + ${#numbers.formatDecimal(it.unitPrice, 1, 2)}">$0.00</td>
+                        <td class="text-end fw-bold text-danger" th:text="'$' + ${#numbers.formatDecimal(it.refundTotal, 1, 2)}">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center p-3 rounded bg-light border">
+            <h5 class="fw-bold mb-0">Total Refunded to Customer:</h5>
+            <h4 class="fw-bold text-danger mb-0" th:text="'$' + ${#numbers.formatDecimal(saleReturn.refundAmount, 1, 2)}">$0.00</h4>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

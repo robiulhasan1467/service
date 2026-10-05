@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#expense-categories-content}, 'Expense Categories', 'expense-categories')}">
+<body>
+<div id="expense-categories-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Expense Categories</h2>
+            <p class="text-muted small mb-0">Classify overhead and operating costs (Rent, Packaging, Utilities, Logistics, Marketing).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/expenses}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Expenses
+            </a>
+            <button type="button" class="btn btn-artisan" data-bs-toggle="modal" data-bs-target="#newExpenseCatModal">
+                <i class="bi bi-plus-circle me-1"></i> Add Category
+            </button>
+        </div>
+    </div>
+
+    <!-- Expense Categories Table -->
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th style="width: 140px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(categories)}">
+                        <td colspan="4" class="text-center py-4 text-muted">No expense categories found.</td>
+                    </tr>
+                    <tr th:each="cat : ${categories}">
+                        <td class="fw-bold text-muted" th:text="${cat.id}">1</td>
+                        <td>
+                            <strong class="text-dark" th:text="${cat.name}">Rent & Lease</strong>
+                        </td>
+                        <td class="text-muted" th:text="${cat.description != null && !cat.description.isEmpty() ? cat.description : '—'}">Store and kitchen facility monthly lease</td>
+                        <td>
+                            <span th:if="${cat.status.name() == 'ACTIVE'}" class="badge bg-success">ACTIVE</span>
+                            <span th:if="${cat.status.name() == 'INACTIVE'}" class="badge bg-secondary">INACTIVE</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- New Expense Category Modal -->
+    <div class="modal fade" id="newExpenseCatModal" tabindex="-1" aria-labelledby="newExpenseCatModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/expenses/categories/save}" th:object="${newCategory}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="newExpenseCatModalLabel">Add Expense Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{name}" class="form-control" placeholder="e.g. Cold Chain Shipping, Packaging Boxes" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Brief explanation of costs classified under this category..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-artisan">Create Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

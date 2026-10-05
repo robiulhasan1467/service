@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#supplier-form-content}, 'Supplier Details', 'suppliers')}">
+<body>
+<div id="supplier-form-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1" th:text="${supplier.id == null ? 'Add Supplier' : 'Edit Supplier #' + supplier.id}">Supplier Details</h2>
+            <p class="text-muted small mb-0">Maintain supplier identity, contact information, and initial opening balance.</p>
+        </div>
+        <a th:href="@{/suppliers}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Suppliers
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4" style="max-width: 680px; margin: 0 auto;">
+        <form th:action="@{/suppliers/save}" th:object="${supplier}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Contact Person <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}" class="form-control" placeholder="e.g. Hans Peter" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Company Name</label>
+                    <input type="text" th:field="*{companyName}" class="form-control" placeholder="e.g. Swiss Cocoa Importers Ltd">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Phone Number</label>
+                    <input type="text" th:field="*{phone}" class="form-control" placeholder="+1-555-0100">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Email Address</label>
+                    <input type="email" th:field="*{email}" class="form-control" placeholder="orders@supplier.com">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Physical Address</label>
+                    <textarea th:field="*{address}" class="form-control" rows="2" placeholder="Street, city, country..."></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Opening Due Balance ($)</label>
+                    <input type="number" th:field="*{openingDue}" class="form-control" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a th:href="@{/suppliers}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-artisan px-4">Save Supplier</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

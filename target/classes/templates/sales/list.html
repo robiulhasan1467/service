@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="bn" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#sales-content}, 'অর্ডার ও ডেলিভারি নিয়ন্ত্রণ', 'sales-history')}">
+<body>
+<div id="sales-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">JaHa অর্ডার ও ডেলিভারি কন্ট্রোল</h2>
+            <p class="text-muted small mb-0">অনলাইন লাইভ শপিং অর্ডার ও কাউন্টার সেলস পর্যবেক্ষণ করুন, কুরিয়ার ও ডেলিভারি পরিচালনা করুন।</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/pos}" class="btn btn-danger fw-bold shadow-sm">
+                <i class="bi bi-cart-plus me-1"></i> নতুন POS কাউন্টার সেল
+            </a>
+            <a th:href="@{/reports/profit}" class="btn btn-outline-success">
+                <i class="bi bi-graph-up me-1"></i> সেলস অ্যাকাউন্টিং ও লাভ
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+        <span th:text="${successMessage}">Success</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+        <span th:text="${errorMessage}">Error</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card border-0 shadow-sm p-3 mb-4 rounded-3">
+        <form method="get" th:action="@{/sales}" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted mb-1">সার্চ করুন</label>
+                <input type="text" name="query" class="form-control form-control-sm" placeholder="ইনভয়েস #, নাম বা ফোন..." th:value="${query}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">ডেলিভারি অবস্থা</label>
+                <select name="deliveryStatus" class="form-select form-select-sm">
+                    <option value="">সকল ডেলিভারি</option>
+                    <option th:each="ds : ${deliveryStatuses}" th:value="${ds}" th:text="${ds.displayName}" th:selected="${ds == deliveryStatus}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">শুরুর তারিখ</label>
+                <input type="date" name="startDate" class="form-control form-control-sm" th:value="${startDate}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">শেষের তারিখ</label>
+                <input type="date" name="endDate" class="form-control form-control-sm" th:value="${endDate}">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-danger flex-fill fw-bold">
+                    <i class="bi bi-funnel me-1"></i> ফিল্টার
+                </button>
+                <a th:href="@{/sales}" class="btn btn-sm btn-outline-secondary">রিসেট</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sales & Orders Table -->
+    <div class="card border-0 shadow-sm p-3 rounded-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ইনভয়েস নং</th>
+                        <th>অর্ডারের তারিখ</th>
+                        <th>গ্রাহকের তথ্য ও ঠিকানা</th>
+                        <th>পণ্য সংখ্যা</th>
+                        <th class="text-end">মোট বিল (৳)</th>
+                        <th class="text-end">ক্যাশ অন ডেলিভারি (বকেয়া)</th>
+                        <th class="text-end">মুনাফা (৳)</th>
+                        <th class="text-center">ডেলিভারি স্ট্যাটাস</th>
+                        <th class="text-end">অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${salePage.empty}">
+                        <td colspan="9" class="text-center py-4 text-muted">কোনো অর্ডার পাওয়া যায়নি।</td>
+                    </tr>
+                    <tr th:each="sale : ${salePage.content}">
+                        <td>
+                            <strong class="text-danger" th:text="${sale.invoiceNo}">JH-001</strong>
+                            <small class="d-block text-muted" th:text="${sale.paymentMethod}">CASH</small>
+                        </td>
+                        <td>
+                            <span th:text="${#temporals.format(sale.saleDate, 'dd MMM yyyy')}">Date</span>
+                            <small class="text-muted d-block" th:text="${#temporals.format(sale.saleDate, 'hh:mm a')}">Time</small>
+                        </td>
+                        <td>
+                            <strong class="d-block" th:text="${sale.customer.name}">Customer</strong>
+                            <small class="text-danger d-block fw-semibold" th:text="${sale.customer.phone}">Phone</small>
+                            <small class="text-muted text-truncate d-inline-block" style="max-width: 220px;" th:text="${sale.customer.address}">Address</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border" th:text="${sale.items != null ? sale.items.size() : 0} + ' টি পণ্য'">Items</span>
+                        </td>
+                        <td class="text-end">
+                            <strong class="text-dark fs-6" th:text="'৳ ' + ${#numbers.formatDecimal(sale.totalAmount, 0, 'COMMA', 0, 'POINT')}">৳ 0</strong>
+                            <small class="text-muted d-block" th:if="${sale.tax != null and sale.tax > 0}" th:text="'ডেলিভারি: ৳ ' + ${#numbers.formatDecimal(sale.tax, 0, 'COMMA', 0, 'POINT')}"></small>
+                        </td>
+                        <td class="text-end">
+                            <span th:if="${sale.dueAmount > 0}" class="badge bg-danger fs-6" th:text="'৳ ' + ${#numbers.formatDecimal(sale.dueAmount, 0, 'COMMA', 0, 'POINT')}">৳ 0</span>
+                            <span th:unless="${sale.dueAmount > 0}" class="badge bg-success bg-opacity-10 text-success">পরিশোধিত</span>
+                        </td>
+                        <td class="text-end text-success fw-bold" th:text="'৳ ' + ${#numbers.formatDecimal(sale.profit, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        
+                        <!-- Delivery Status Badge & Courier Info -->
+                        <td class="text-center">
+                            <span th:if="${sale.deliveryStatus == null or sale.deliveryStatus.name() == 'PENDING'}" class="badge bg-warning text-dark py-2 px-3 rounded-pill">
+                                <i class="bi bi-clock-history me-1"></i> পেন্ডিং
+                            </span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'CONFIRMED'}" class="badge bg-info text-dark py-2 px-3 rounded-pill">
+                                <i class="bi bi-check-circle me-1"></i> কনফার্মড
+                            </span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'PACKAGING'}" class="badge bg-primary py-2 px-3 rounded-pill">
+                                <i class="bi bi-box-seam me-1"></i> প্যাকেজিং
+                            </span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'SHIPPED'}" class="badge bg-dark py-2 px-3 rounded-pill">
+                                <i class="bi bi-truck me-1"></i> কুরিয়ারে
+                            </span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'DELIVERED'}" class="badge bg-success py-2 px-3 rounded-pill">
+                                <i class="bi bi-check2-all me-1"></i> ডেলিভার্ড
+                            </span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'CANCELLED'}" class="badge bg-secondary py-2 px-3 rounded-pill">
+                                বাতিল
+                            </span>
+                            
+                            <div th:if="${sale.courierName != null}" class="small text-muted mt-1" style="font-size: 0.72rem;">
+                                <span th:text="${sale.courierName}">Steadfast</span>: <code th:text="${sale.trackingCode}">12345</code>
+                            </div>
+                        </td>
+
+                        <!-- Actions & Delivery Update Modal Trigger -->
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" 
+                                    th:data-bs-target="'#deliveryModal-' + ${sale.id}" title="ডেলিভারি আপডেট করুন">
+                                <i class="bi bi-truck me-1"></i> আপডেট
+                            </button>
+                            <a th:href="@{'/sales/invoice/' + ${sale.invoiceNo}}" class="btn btn-sm btn-outline-secondary ms-1" title="ইনভয়েস প্রিন্ট">
+                                <i class="bi bi-printer"></i>
+                            </a>
+
+                            <!-- Delivery Status Update Modal for this order -->
+                            <div class="modal fade text-start" th:id="'deliveryModal-' + ${sale.id}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title fs-6">
+                                                <i class="bi bi-truck text-danger me-2"></i>
+                                                অর্ডার ডেলিভারি আপডেট: <span th:text="${sale.invoiceNo}"></span>
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form th:action="@{'/sales/' + ${sale.id} + '/delivery-status'}" method="post">
+                                            <div class="modal-body p-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold small">গ্রাহক:</label>
+                                                    <div th:text="${sale.customer.name} + ' (' + ${sale.customer.phone} + ')'" class="fw-semibold"></div>
+                                                    <small class="text-muted" th:text="${sale.customer.address}"></small>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold small">ডেলিভারি স্ট্যাটাস নির্বাচন করুন <span class="text-danger">*</span></label>
+                                                    <select name="deliveryStatus" class="form-select form-select-lg" required>
+                                                        <option th:each="ds : ${deliveryStatuses}" th:value="${ds}" 
+                                                                th:text="${ds.displayName}" 
+                                                                th:selected="${sale.deliveryStatus != null and sale.deliveryStatus == ds}"></option>
+                                                    </select>
+                                                    <small class="text-muted">ডেলিভারি সম্পন্ন (DELIVERED) সিলেক্ট করলে ক্যাশ অন ডেলিভারি টাকা স্বয়ংক্রিয়ভাবে আদায় হিসেবে গণ্য হবে।</small>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold small">কুরিয়ার সার্ভিস (Courier)</label>
+                                                    <select name="courierName" class="form-select">
+                                                        <option value="">-- কুরিয়ার নির্বাচন করুন --</option>
+                                                        <option value="Steadfast Courier" th:selected="${sale.courierName == 'Steadfast Courier'}">Steadfast Courier (স্টেডফাস্ট)</option>
+                                                        <option value="Pathao Courier" th:selected="${sale.courierName == 'Pathao Courier'}">Pathao Courier (পাঠাও)</option>
+                                                        <option value="RedX Logistics" th:selected="${sale.courierName == 'RedX Logistics'}">RedX Logistics (রেডএক্স)</option>
+                                                        <option value="Paperfly" th:selected="${sale.courierName == 'Paperfly'}">Paperfly (পেপারফ্লাই)</option>
+                                                        <option value="Sundarban Courier" th:selected="${sale.courierName == 'Sundarban Courier'}">Sundarban Courier (সুন্দরবন)</option>
+                                                        <option value="In-house Rider" th:selected="${sale.courierName == 'In-house Rider'}">নিজস্ব ডেলিভারি ম্যান (Rider)</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold small">কুরিয়ার ট্র্যাকিং নম্বর (Consignment ID)</label>
+                                                    <input type="text" name="trackingCode" class="form-control" placeholder="যেমন: ST-998822" th:value="${sale.trackingCode}">
+                                                    <small class="text-muted">গ্রাহক ওয়েবসাইটে এই কোড দেখতে পাবে</small>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বন্ধ করুন</button>
+                                                <button type="submit" class="btn btn-danger fw-bold">স্ট্যাটাস সংরক্ষণ করুন</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${salePage.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+            <span class="small text-muted" th:text="'পাতা ' + (${salePage.number} + 1) + ' / ' + ${salePage.totalPages}"></span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${salePage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/sales(page=${salePage.number - 1}, query=${query}, status=${status}, deliveryStatus=${deliveryStatus}, startDate=${startDate}, endDate=${endDate})}">Previous</a>
+                </li>
+                <li class="page-item" th:classappend="${salePage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/sales(page=${salePage.number + 1}, query=${query}, status=${status}, deliveryStatus=${deliveryStatus}, startDate=${startDate}, endDate=${endDate})}">Next</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

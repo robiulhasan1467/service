@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#dues-report-content}, 'Accounts Due Balances', 'reports-dues')}">
+<body>
+<div id="dues-report-content">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Due Balances &amp; Credit Ledger</h2>
+            <p class="text-muted small mb-0">Overview of accounts receivable (unpaid customer invoices) and accounts payable (supplier bills).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> Print Balances
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Accounts Receivable -->
+        <div class="col-md-6">
+            <div class="card stat-card shadow-sm border-0 border-start border-4 border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold">Accounts Receivable (Customers)</span>
+                            <h3 class="fw-bold text-dark mb-0 mt-1">
+                                <span th:text="${customerDues != null ? customerDues.size() : 0}">0</span> Accounts Pending
+                            </h3>
+                            <small class="text-muted">Uncollected customer balances</small>
+                        </div>
+                        <div class="p-3 bg-warning-subtle text-warning-emphasis rounded-circle">
+                            <i class="bi bi-people-fill fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts Payable -->
+        <div class="col-md-6">
+            <div class="card stat-card shadow-sm border-0 border-start border-4 border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted small text-uppercase fw-bold">Accounts Payable (Suppliers)</span>
+                            <h3 class="fw-bold text-dark mb-0 mt-1">
+                                <span th:text="${supplierDues != null ? supplierDues.size() : 0}">0</span> Suppliers Pending
+                            </h3>
+                            <small class="text-muted">Unsettled purchase procurement bills</small>
+                        </div>
+                        <div class="p-3 bg-danger-subtle text-danger rounded-circle">
+                            <i class="bi bi-truck fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Customer Dues Table -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-person-exclamation text-warning me-2"></i>Customer Receivables
+                    </h5>
+                    <a th:href="@{/customers}" class="btn btn-sm btn-outline-secondary">View All Customers</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Customer</th>
+                                <th>Contact</th>
+                                <th class="text-end">Balance Due</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(customerDues)}">
+                                <td colspan="4" class="text-center py-4 text-muted">All customer balances are fully settled! 🎉</td>
+                            </tr>
+                            <tr th:each="item : ${customerDues}">
+                                <td>
+                                    <strong class="text-dark" th:text="${item.customer.name}">Customer Name</strong>
+                                    <div class="small text-muted" th:text="${item.customer.email}">customer@example.com</div>
+                                </td>
+                                <td>
+                                    <span th:text="${item.customer.phone}">+1234567890</span>
+                                </td>
+                                <td class="text-end fw-bold text-danger" th:text="'$' + ${#numbers.formatDecimal(item.currentDue, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                <td class="text-end">
+                                    <a th:href="@{'/customers/' + ${item.customer.id}}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i> Collect
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supplier Dues Table -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-truck-flatbed text-danger me-2"></i>Supplier Payables
+                    </h5>
+                    <a th:href="@{/suppliers}" class="btn btn-sm btn-outline-secondary">View All Suppliers</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Supplier</th>
+                                <th>Company</th>
+                                <th class="text-end">Payable Due</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(supplierDues)}">
+                                <td colspan="4" class="text-center py-4 text-muted">All supplier invoices are fully paid! 🎉</td>
+                            </tr>
+                            <tr th:each="item : ${supplierDues}">
+                                <td>
+                                    <strong class="text-dark" th:text="${item.supplier.name}">Supplier Co.</strong>
+                                    <div class="small text-muted" th:text="${item.supplier.phone}">+1234567890</div>
+                                </td>
+                                <td>
+                                    <span th:text="${item.supplier.companyName != null && !item.supplier.companyName.isEmpty() ? item.supplier.companyName : '—'}">Company</span>
+                                </td>
+                                <td class="text-end fw-bold text-danger" th:text="'$' + ${#numbers.formatDecimal(item.currentDue, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                <td class="text-end">
+                                    <a th:href="@{'/suppliers/' + ${item.supplier.id}}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-credit-card me-1"></i> Settle
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

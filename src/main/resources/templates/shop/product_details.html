@@ -1,0 +1,287 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:attr="data-theme=${theme}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.name} + ' | JaHa Live Shopping Bangladesh'">পণ্য বিবরণ | JaHa</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- JaHa Live Shopping CSS -->
+    <link rel="stylesheet" th:href="@{/css/liveshopping.css}">
+    <script th:replace="~{layout :: theme-init}"></script>
+</head>
+<body>
+
+    <!-- Topbar -->
+    <div class="jaha-topbar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div><i class="bi bi-telephone-fill me-1 text-danger"></i> হটলাইন: <a th:href="'tel:' + ${hotlineIntl}" class="hotline-badge" th:text="${hotline}">09613-111333</a></div>
+            <div class="d-flex gap-3">
+                <a th:href="@{/order-track}"><i class="bi bi-geo-alt-fill me-1 text-info"></i> <span class="language-en">Track Order</span><span class="language-bn" hidden>অর্ডার ট্র্যাক করুন</span></a>
+                <a th:href="@{/}" class="text-white-50"><i class="bi bi-house-door me-1"></i> <span class="language-en">Home</span><span class="language-bn" hidden>হোমে ফিরুন</span></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="jaha-main-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a th:href="@{/}">
+                <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" class="jaha-brand-logo">
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                                                <div th:replace="~{layout :: theme-control}"></div>
+                                <button class="btn btn-sm btn-outline-dark me-2" type="button" id="languageToggle" aria-label="Switch language to Bengali" aria-pressed="false"><i class="bi bi-translate me-1" aria-hidden="true"></i><span id="languageToggleLabel">বাংলা</span></button>
+                <a th:href="@{/shop}" class="btn btn-outline-dark rounded-pill px-3 py-2 btn-sm">
+                    <i class="bi bi-grid me-1"></i> সকল পণ্য
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container my-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">হোম</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/shop}" class="text-decoration-none">শপ</a></li>
+                <li class="breadcrumb-item active" th:text="${product.name}">পণ্য</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+            <!-- Left: Product Photo & Details -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+                    <div class="position-relative text-center overflow-hidden rounded-3 mb-3">
+                        <span class="discount-badge fs-6 px-3 py-2" th:if="${product.discountPrice != null and product.discountPrice < product.sellingPrice}">
+                            <i class="bi bi-tag-fill me-1"></i>
+                            <span th:text="${#numbers.formatDecimal((product.sellingPrice - product.discountPrice) / product.sellingPrice * 100, 0, 0)} + '% ছাড়'">25%</span>
+                        </span>
+                        <img th:src="${product.imagePath != null ? product.imagePath : '/images/jaha_logo_transparent.png'}"
+                             th:alt="${product.name}" 
+                             class="img-fluid rounded-3" 
+                             style="max-height: 480px; width: 100%; object-fit: cover;">
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                        <div>
+                            <span class="badge bg-light text-danger border px-3 py-2 rounded-pill fw-bold" th:text="${product.category.name}">Category</span>
+                            <span class="badge bg-success bg-opacity-10 text-success ms-2 px-3 py-2 rounded-pill fw-bold">
+                                <i class="bi bi-check2-circle me-1"></i> ইন স্টক আছে
+                            </span>
+                        </div>
+                        <div class="text-warning fs-6">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                            <span class="text-muted small ms-1">(4.9/5)</span>
+                        </div>
+                    </div>
+
+                    <h1 class="fw-bold fs-3 mb-3" th:text="${product.name}">Product Name</h1>
+
+                    <div class="d-flex align-items-baseline gap-3 mb-4">
+                        <span class="display-6 fw-bold text-danger" th:text="'৳ ' + ${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')}">৳ 1,250</span>
+                        <span class="text-decoration-line-through text-muted fs-5" th:if="${product.discountPrice != null and product.discountPrice < product.sellingPrice}" th:text="'৳ ' + ${#numbers.formatDecimal(product.sellingPrice, 0, 'COMMA', 0, 'POINT')}">৳ 1,600</span>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h5 class="fw-bold mb-2">পণ্যের বিবরণ:</h5>
+                        <p class="text-secondary" style="line-height: 1.7;" th:text="${product.description != null ? product.description : 'প্রিমিয়াম কোয়ালিটি সম্পন্ন অরিজিনাল পণ্য। দৈনন্দিন ব্যবহার ও উৎসবের উপহারের জন্য সেরা পছন্দ।'}">
+                            পণ্যের বিবরণ
+                        </p>
+                    </div>
+
+                    <!-- Trust Box -->
+                    <div class="bg-light rounded-3 p-3 mt-3 d-flex flex-column gap-2 small">
+                        <div><i class="bi bi-truck text-danger me-2"></i> <strong>ডেলিভারি চার্জ:</strong> ঢাকার ভিতরে ৳৬০ | ঢাকার বাইরে ৳১২০</div>
+                        <div><i class="bi bi-cash-coin text-success me-2"></i> <strong>পেমেন্ট:</strong> ক্যাশ অন ডেলিভারি (পণ্য হাতে পেয়ে মূল্য পরিশোধ)</div>
+                        <div><i class="bi bi-shield-check text-primary me-2"></i> <strong>গ্যারান্টি:</strong> ১০০% আসল পণ্য ও ৩ দিনের সহজ রিপ্লেসমেন্ট</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Bangladeshi Direct On-Page 1-Click Order Form -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 80px; background: #ffffff;">
+                    <div class="d-flex align-items-center gap-2 border-bottom pb-3 mb-3">
+                        <div class="bg-danger text-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-bag-check-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark fs-5">সরাসরি অর্ডার করতে ফর্মটি পূরণ করুন</h4>
+                            <small class="text-muted">কোনো অগ্রিম পেমেন্ট ছাড়াই ক্যাশ অন ডেলিভারিতে অর্ডার করুন</small>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/quick-order}" method="post" id="detailOrderForm">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+
+                        <!-- Quantity Selector -->
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border mb-3">
+                            <span class="fw-bold text-dark">অর্ডারের পরিমাণ (Quantity):</span>
+                            <div class="quantity-counter">
+                                <button type="button" id="detailQtyMinus">-</button>
+                                <input type="number" name="quantity" id="detailQtyInput" value="1" min="1" readonly>
+                                <button type="button" id="detailQtyPlus">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">আপনার নাম <span class="text-danger">*</span></label>
+                            <input type="text" name="customerName" class="form-control form-control-lg" placeholder="সম্পূর্ণ নাম লিখুন" required>
+                        </div>
+
+                        <!-- Mobile -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">মোবাইল নম্বর <span class="text-danger">*</span></label>
+                            <input type="tel" name="customerPhone" class="form-control form-control-lg" placeholder="১১ ডিজিটের মোবাইল নম্বর (যেমন: 017...)" pattern="[0-9]{11}" required>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">সম্পূর্ণ ডেলিভারি ঠিকানা <span class="text-danger">*</span></label>
+                            <textarea name="deliveryAddress" class="form-control" rows="2" placeholder="বাড়ি নং, রোড নং, থানা ও জেলার নাম" required></textarea>
+                        </div>
+
+                        <!-- Delivery Zone -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-dark">ডেলিভারি এলাকা <span class="text-danger">*</span></label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="zone-option-card active w-100" for="zoneDhaka">
+                                        <div>
+                                            <input type="radio" name="deliveryZone" id="zoneDhaka" value="DHAKA" checked class="form-check-input me-1">
+                                            <span class="small fw-semibold">ঢাকার ভিতরে</span>
+                                        </div>
+                                        <span class="badge bg-danger">৳ ৬০</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <label class="zone-option-card w-100" for="zoneOutside">
+                                        <div>
+                                            <input type="radio" name="deliveryZone" id="zoneOutside" value="OUTSIDE" class="form-check-input me-1">
+                                            <span class="small fw-semibold">ঢাকার বাইরে</span>
+                                        </div>
+                                        <span class="badge bg-danger">৳ ১২০</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Option -->
+                        <div class="mb-3">
+                            <div class="p-2 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="radio" name="paymentMethod" value="CASH" checked class="form-check-input">
+                                    <span class="small fw-bold">ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা পরিশোধ)</span>
+                                </div>
+                                <i class="bi bi-patch-check-fill text-success"></i>
+                            </div>
+                        </div>
+
+                        <!-- Live Cost Breakdown -->
+                        <div class="order-cost-breakdown">
+                            <div class="breakdown-row">
+                                <span>পণ্যের মূল্য:</span>
+                                <span id="detailSubtotal" class="fw-bold" th:text="'৳ ' + ${#numbers.formatDecimal(product.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')}">৳ 0</span>
+                            </div>
+                            <div class="breakdown-row">
+                                <span>ডেলিভারি চার্জ:</span>
+                                <span id="detailDeliveryFee" class="fw-bold">৳ ৬০</span>
+                            </div>
+                            <div class="breakdown-row total-row">
+                                <span>সর্বমোট প্রদেয়:</span>
+                                <span id="detailGrandTotal" th:text="'৳ ' + ${#numbers.formatDecimal(product.getEffectivePrice() + 60, 0, 'COMMA', 0, 'POINT')}">৳ 0</span>
+                            </div>
+                        </div>
+
+                        <!-- Big Submit Button -->
+                        <button type="submit" class="btn-confirm-order">
+                            <i class="bi bi-bag-check-fill me-2"></i>
+                            <span id="detailSubmitBtnText" th:text="'অর্ডার কনফার্ম করুন • ৳ ' + ${#numbers.formatDecimal(product.getEffectivePrice() + 60, 0, 'COMMA', 0, 'POINT')}">অর্ডার কনফার্ম করুন</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products -->
+        <section class="mt-5" th:if="${!relatedProducts.empty}">
+            <h4 class="fw-bold mb-3">সম্পর্কিত অন্যান্য পণ্য</h4>
+            <div class="row g-3">
+                <div class="col-6 col-md-3" th:each="rel : ${relatedProducts}">
+                    <div class="jaha-product-card">
+                        <div class="product-img-wrap">
+                            <a th:href="@{'/product/' + ${rel.id}}">
+                                <img th:src="${rel.imagePath != null ? rel.imagePath : '/images/jaha_logo_transparent.png'}" th:alt="${rel.name}">
+                            </a>
+                        </div>
+                        <div class="product-info-wrap">
+                            <h5 class="product-title"><a th:href="@{'/product/' + ${rel.id}}" th:text="${rel.name}">Product</a></h5>
+                            <div class="current-price mb-2" th:text="'৳ ' + ${#numbers.formatDecimal(rel.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')}">৳ 0</div>
+                            <a th:href="@{'/product/' + ${rel.id}}" class="btn btn-outline-danger btn-sm w-100 rounded-pill fw-bold">অর্ডার করুন</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="jaha-footer">
+        <div class="container text-center">
+            <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" style="height: 42px;" class="jaha-brand-logo mb-3">
+            <p class="small text-white-50 mb-1">&copy; 2026 JaHa Live Shopping Bangladesh &bull; হটলাইন: <span th:text="${hotline}">09613-111333</span></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{/js/liveshopping.js}"></script>
+        <script th:replace="~{layout :: common-script}"></script>
+    <script th:inline="javascript">
+        /* Dynamic price calculation on product page */
+        const unitPrice = /*[[${product.getEffectivePrice()}]]*/ 0;
+        const minusBtn = document.getElementById('detailQtyMinus');
+        const plusBtn = document.getElementById('detailQtyPlus');
+        const qtyInput = document.getElementById('detailQtyInput');
+
+        function recalculateDetail() {
+            let qty = parseInt(qtyInput.value) || 1;
+            let subtotal = unitPrice * qty;
+            let isOutside = document.querySelector('input[name="deliveryZone"]:checked')?.value === 'OUTSIDE';
+            let deliveryFee = isOutside ? 120 : 60;
+            let grandTotal = subtotal + deliveryFee;
+
+            document.getElementById('detailSubtotal').textContent = '৳ ' + subtotal.toLocaleString();
+            document.getElementById('detailDeliveryFee').textContent = '৳ ' + deliveryFee.toLocaleString();
+            document.getElementById('detailGrandTotal').textContent = '৳ ' + grandTotal.toLocaleString();
+            document.getElementById('detailSubmitBtnText').textContent = 'অর্ডার কনফার্ম করুন • ৳ ' + grandTotal.toLocaleString();
+        }
+
+        if (minusBtn && plusBtn && qtyInput) {
+            minusBtn.addEventListener('click', () => {
+                let v = parseInt(qtyInput.value) || 1;
+                if (v > 1) { qtyInput.value = v - 1; recalculateDetail(); }
+            });
+            plusBtn.addEventListener('click', () => {
+                let v = parseInt(qtyInput.value) || 1;
+                qtyInput.value = v + 1; recalculateDetail();
+            });
+            document.querySelectorAll('input[name="deliveryZone"]').forEach(r => {
+                r.addEventListener('change', () => {
+                    document.querySelectorAll('.zone-option-card').forEach(c => c.classList.remove('active'));
+                    r.closest('.zone-option-card').classList.add('active');
+                    recalculateDetail();
+                });
+            });
+        }
+    </script>
+</body>
+</html>

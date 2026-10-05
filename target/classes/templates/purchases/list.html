@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#purchases-list-content}, 'Purchase Orders', 'purchases')}">
+<body>
+<div id="purchases-list-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Purchase Orders</h2>
+            <p class="text-muted small mb-0">Supplier stock acquisitions, inward invoice tracking, and payable balances.</p>
+        </div>
+        <a th:href="@{/purchases/new}" class="btn btn-artisan">
+            <i class="bi bi-cart-plus me-1"></i> New Purchase Order
+        </a>
+    </div>
+
+    <!-- Purchases Table -->
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Supplier</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th>Paid</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${purchasePage.empty}">
+                        <td colspan="9" class="text-center py-4 text-muted">No purchase orders found.</td>
+                    </tr>
+                    <tr th:each="p : ${purchasePage.content}">
+                        <td><strong class="text-primary" th:text="${p.invoiceNo}">PUR-001</strong></td>
+                        <td>
+                            <strong th:text="${p.supplier.name}">Supplier</strong>
+                            <small class="text-muted d-block" th:text="${p.supplier.companyName}"></small>
+                        </td>
+                        <td th:text="${#temporals.format(p.purchaseDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${p.items != null ? p.items.size() : 0} + ' items'">Items</span></td>
+                        <td><strong th:text="'$' + ${#numbers.formatDecimal(p.totalAmount, 1, 2)}">$0.00</strong></td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(p.paidAmount, 1, 2)}">$0.00</td>
+                        <td>
+                            <span th:if="${p.dueAmount > 0}" class="badge bg-danger" th:text="'$' + ${#numbers.formatDecimal(p.dueAmount, 1, 2)}">$0.00</span>
+                            <span th:unless="${p.dueAmount > 0}" class="text-muted">$0.00</span>
+                        </td>
+                        <td>
+                            <span th:if="${p.status.name() == 'CONFIRMED'}" class="badge bg-success">CONFIRMED</span>
+                            <span th:if="${p.status.name() == 'CANCELLED'}" class="badge bg-secondary">CANCELLED</span>
+                            <span th:if="${p.status.name() == 'DRAFT'}" class="badge bg-warning text-dark">DRAFT</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/purchases/view/' + ${p.id}}" class="btn btn-sm btn-outline-secondary" title="View Details">
+                                <i class="bi bi-eye"></i> Details
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

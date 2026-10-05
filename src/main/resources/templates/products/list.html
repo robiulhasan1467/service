@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="bn" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#products-list-content}, 'পণ্যের তালিকা ও স্টক', 'products')}">
+<body>
+<div id="products-list-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">JaHa পণ্যের তালিকা ও পরিচালনা</h2>
+            <p class="text-muted small mb-0">দোকানের সকল পণ্য দেখুন, নতুন পণ্য পোস্ট করুন এবং স্টক ও মূল্য পরিবর্তন করুন।</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/products/new}" class="btn btn-danger fw-bold shadow-sm">
+                <i class="bi bi-plus-circle-fill me-1"></i> নতুন পণ্য পোস্ট করুন
+            </a>
+            <a th:href="@{/}" target="_blank" class="btn btn-outline-secondary">
+                <i class="bi bi-shop me-1"></i> লাইভ স্টোর দেখুন
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}">Success</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}">Error</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card border-0 shadow-sm p-3 mb-4 rounded-3">
+        <form method="get" th:action="@{/products}" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted mb-1">সার্চ করুন</label>
+                <input type="text" name="query" class="form-control form-control-sm" placeholder="পণ্যের নাম বা SKU..." th:value="${query}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">ক্যাটাগরি</label>
+                <select name="categoryId" class="form-select form-select-sm">
+                    <option value="">সকল ক্যাটাগরি</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${cat.id == categoryId}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted mb-1">ব্র্যান্ড</label>
+                <select name="brandId" class="form-select form-select-sm">
+                    <option value="">সকল ব্র্যান্ড</option>
+                    <option th:each="br : ${brands}" th:value="${br.id}" th:text="${br.name}" th:selected="${br.id == brandId}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="form-check pt-3">
+                    <input class="form-check-input" type="checkbox" name="lowStock" value="true" id="checkLowStock" th:checked="${lowStock}">
+                    <label class="form-check-label small fw-semibold text-danger" for="checkLowStock">
+                        কম স্টক পণ্য
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-danger flex-fill fw-bold">
+                    <i class="bi bi-funnel me-1"></i> ফিল্টার
+                </button>
+                <a th:href="@{/products}" class="btn btn-sm btn-outline-secondary">রিসেট</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Products Table -->
+    <div class="card border-0 shadow-sm p-3 rounded-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ছবি ও পণ্য</th>
+                        <th>SKU</th>
+                        <th>ক্যাটাগরি</th>
+                        <th>ব্র্যান্ড</th>
+                        <th class="text-end">ক্রয় খরচ</th>
+                        <th class="text-end">বিক্রয় মূল্য</th>
+                        <th class="text-center">স্টক</th>
+                        <th>অবস্থা</th>
+                        <th class="text-end">অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${productPage.empty}">
+                        <td colspan="9" class="text-center py-4 text-muted">কোনো পণ্য পাওয়া যায়নি।</td>
+                    </tr>
+                    <tr th:each="p : ${productPage.content}">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img th:src="${p.imagePath != null and !p.imagePath.isEmpty() ? p.imagePath : '/images/jaha_logo_transparent.png'}"
+                                     alt="Product" style="width: 44px; height: 44px; object-fit: cover;" class="rounded border">
+                                <div>
+                                    <strong class="d-block" th:text="${p.name}">Product Name</strong>
+                                    <small class="text-muted" th:text="${p.unit != null ? p.unit : 'pcs'}"></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><code th:text="${p.sku}">SKU</code></td>
+                        <td><span class="badge bg-light text-dark border" th:text="${p.category.name}">Category</span></td>
+                        <td th:text="${p.brand != null ? p.brand.name : '-'}">Brand</td>
+                        <td class="text-end text-muted" th:text="'৳ ' + ${#numbers.formatDecimal(p.purchasePrice, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        <td class="text-end">
+                            <strong class="text-danger" th:text="'৳ ' + ${#numbers.formatDecimal(p.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')}">৳ 0</strong>
+                            <div th:if="${p.discountPrice != null and p.discountPrice < p.sellingPrice}" class="small text-muted text-decoration-line-through" 
+                                 th:text="'৳ ' + ${#numbers.formatDecimal(p.sellingPrice, 0, 'COMMA', 0, 'POINT')}"></div>
+                        </td>
+                        <td class="text-center">
+                            <span th:if="${p.stockQuantity <= 0}" class="badge bg-danger">স্টক শেষ</span>
+                            <span th:if="${p.stockQuantity > 0 and p.isLowStock()}" class="badge bg-warning text-dark" th:text="${p.stockQuantity} + ' (কম)'">Low</span>
+                            <span th:if="${p.stockQuantity > p.minStockLevel}" class="badge bg-success" th:text="${p.stockQuantity}">50</span>
+                        </td>
+                        <td>
+                            <span th:if="${p.status.name() == 'ACTIVE'}" class="badge bg-success bg-opacity-10 text-success">সক্রিয়</span>
+                            <span th:if="${p.status.name() == 'INACTIVE'}" class="badge bg-secondary">নিষ্ক্রিয়</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/product/' + ${p.id}}" target="_blank" class="btn btn-sm btn-outline-info" title="লাইভ দেখুন">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a th:href="@{'/products/edit/' + ${p.id}}" class="btn btn-sm btn-outline-secondary ms-1" title="সম্পাদনা">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{'/products/toggle/' + ${p.id}}" method="post" class="d-inline ms-1" onsubmit="return confirm('পণ্যটির স্ট্যাটাস পরিবর্তন করবেন?');">
+                                <button type="submit" class="btn btn-sm" th:classappend="${p.status.name() == 'ACTIVE'} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                        th:title="${p.status.name() == 'ACTIVE'} ? 'Deactivate' : 'Activate'">
+                                    <i th:class="${p.status.name() == 'ACTIVE'} ? 'bi bi-slash-circle' : 'bi bi-check-circle'"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${productPage.totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+            <span class="small text-muted" th:text="'পাতা ' + (${productPage.number} + 1) + ' / ' + ${productPage.totalPages}"></span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${productPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products(page=${productPage.number - 1}, query=${query}, categoryId=${categoryId}, brandId=${brandId}, lowStock=${lowStock})}">Previous</a>
+                </li>
+                <li class="page-item" th:classappend="${productPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products(page=${productPage.number + 1}, query=${query}, categoryId=${categoryId}, brandId=${brandId}, lowStock=${lowStock})}">Next</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

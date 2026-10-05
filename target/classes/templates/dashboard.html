@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#dashboard-content}, 'JaHa Dashboard', 'dashboard')}">
+<body>
+<div id="dashboard-content">
+
+    <!-- Dashboard Title Banner with 4 Primary Control Shortcuts -->
+    <div class="card dashboard-overview p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h1 class="h3 fw-bold mb-0"><span id="dynamicGreeting">Good Morning</span></h1>
+                </div>
+                <p class="text-muted mb-0">Here's what's happening with your store today.</p>
+            </div>
+            <!-- Quick Actions -->
+            <div class="d-flex flex-wrap gap-2">
+                <a th:href="@{/products/new}" class="btn btn-danger fw-bold">
+                    <i class="bi bi-plus-lg me-1"></i> Add Product
+                </a>
+                <a th:href="@{/sales}" class="btn btn-outline-secondary fw-semibold">
+                    <i class="bi bi-truck me-1"></i> Orders
+                </a>
+                <a th:href="@{/reports/profit}" class="btn btn-outline-secondary fw-semibold">
+                    <i class="bi bi-graph-up me-1"></i> Reports
+                </a>
+                <a th:href="@{/}" target="_blank" class="btn btn-outline-secondary fw-semibold">
+                    <i class="bi bi-shop me-1"></i> Live Store
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8 Metric Cards Grid -->
+    <div class="row g-3 mb-4 dashboard-metrics">
+        <!-- Today Sales -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Today's Revenue</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1" th:text="'৳ ' + ${#numbers.formatDecimal(data.todaySales, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                        <small class="text-success fw-semibold"><i class="bi bi-arrow-up-right me-1"></i>Collected today</small>
+                    </div>
+                    <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle fs-4">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today Orders -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Today's Orders</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1" th:text="${data.todayOrders}">0</h3>
+                        <small class="text-muted fw-semibold"><i class="bi bi-receipt me-1"></i>Online and in-store</small>
+                    </div>
+                    <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-circle fs-4">
+                        <i class="bi bi-bag-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today Profit -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Net Profit</span>
+                        <h3 class="fw-bold mb-0 mt-1" th:classappend="${data.todayProfit.signum() >= 0} ? 'text-success' : 'text-danger'"
+                            th:text="'৳ ' + ${#numbers.formatDecimal(data.todayProfit, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                        <small class="text-muted">After costs and expenses</small>
+                    </div>
+                    <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle fs-4">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today Cash Balance -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Cash Collected</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1" th:text="'৳ ' + ${#numbers.formatDecimal(data.todayCashBalance, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                        <small class="text-muted fw-semibold"><i class="bi bi-wallet me-1"></i>Cash and delivery</small>
+                    </div>
+                    <div class="p-3 bg-info bg-opacity-10 text-info rounded-circle fs-4">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Products -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Total Products</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1" th:text="${data.totalProducts}">0</h3>
+                        <small class="text-muted"><a th:href="@{/products/new}" class="text-danger fw-semibold">+ Add product</a></small>
+                    </div>
+                    <div class="p-3 bg-secondary bg-opacity-10 text-secondary rounded-circle fs-4">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white" th:classappend="${data.lowStockProducts > 0} ? 'border-danger' : ''">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Low Stock Alerts</span>
+                        <h3 class="fw-bold text-danger mb-0 mt-1" th:text="${data.lowStockProducts}">0</h3>
+                        <small class="text-danger fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>Items need restocking</small>
+                    </div>
+                    <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle fs-4">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Customers -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Total Customers</span>
+                        <h3 class="fw-bold text-dark mb-0 mt-1" th:text="${data.totalCustomers}">0</h3>
+                        <small class="text-muted">Online and in-store</small>
+                    </div>
+                    <div class="p-3 bg-purple bg-opacity-10 text-primary rounded-circle fs-4">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today Expenses -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 h-100 bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Today's Expenses</span>
+                        <h3 class="fw-bold text-danger mb-0 mt-1" th:text="'৳ ' + ${#numbers.formatDecimal(data.todayExpenses, 0, 'COMMA', 0, 'POINT')}">৳ 0</h3>
+                        <small class="text-muted">Operating costs</small>
+                    </div>
+                    <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle fs-4">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card chart-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="dashboard-section-title mb-0">Sales &amp; profit trend</h2>
+                    <span class="badge bg-light text-dark border">Last 7 days</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="salesTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card p-4 h-100">
+                <h2 class="dashboard-section-title mb-3">Top selling products</h2>
+                <div th:if="${#lists.isEmpty(data.bestSellers)}" class="text-center py-5 text-muted">
+                    <i class="bi bi-basket3 fs-1 d-block mb-2"></i>
+                    No sales recorded yet.
+                </div>
+                <div th:unless="${#lists.isEmpty(data.bestSellers)}" class="list-group list-group-flush">
+                    <div th:each="row, iter : ${data.bestSellers}" class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge rounded-circle bg-danger text-white" th:text="${iter.count}">1</span>
+                            <div>
+                                <h6 class="mb-0 fw-semibold" th:text="${row[1]}">Product Name</h6>
+                                <small class="text-muted" th:text="${row[2]} + ' sold'"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Section with Delivery Status -->
+    <div class="card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="dashboard-section-title mb-0">Recent orders</h2>
+                <small class="text-muted">Latest online and in-store purchases</small>
+            </div>
+            <a th:href="@{/sales}" class="btn btn-sm btn-outline-danger">
+                View all <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th class="text-end">Amount (৳)</th>
+                        <th>Payment</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(data.recentOrders)}">
+                        <td colspan="8" class="text-center py-4 text-muted">No orders to show.</td>
+                    </tr>
+                    <tr th:each="sale : ${data.recentOrders}">
+                        <td><strong class="text-danger" th:text="${sale.invoiceNo}">JH-001</strong></td>
+                        <td th:text="${sale.customer.name}">Customer Name</td>
+                        <td th:text="${#temporals.format(sale.saleDate, 'dd MMM yyyy, hh:mm a')}">Date</td>
+                        <td><span class="badge bg-light text-dark border" th:text="${sale.items != null ? sale.items.size() : 0} + ' items'">3 items</span></td>
+                        <td class="text-end fw-bold" th:text="'৳ ' + ${#numbers.formatDecimal(sale.totalAmount, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                        <td>
+                            <span class="badge bg-secondary text-uppercase" th:text="${sale.paymentMethod}">CASH</span>
+                        </td>
+                        <td class="text-center">
+                            <span th:if="${sale.deliveryStatus == null or sale.deliveryStatus.name() == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'CONFIRMED'}" class="badge bg-info text-dark">Confirmed</span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'PACKAGING'}" class="badge bg-primary">Processing</span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'SHIPPED'}" class="badge bg-dark">Shipped</span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'DELIVERED'}" class="badge bg-success">Delivered</span>
+                            <span th:if="${sale.deliveryStatus != null and sale.deliveryStatus.name() == 'CANCELLED'}" class="badge bg-secondary">Cancelled</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/sales/invoice/' + ${sale.invoiceNo}}" class="btn btn-sm btn-outline-secondary" title="ইনভয়েস প্রিন্ট">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pass Chart Data to Client JS safely -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const chartLabels = /*[[${data.chartLabels}]]*/ [];
+        const chartSalesData = /*[[${data.chartSales}]]*/ [];
+        const chartProfitData = /*[[${data.chartProfits}]]*/ [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('salesTrendsChart');
+            if (ctx && chartLabels.length > 0) {
+                const initialStyle = getComputedStyle(document.documentElement);
+                const initialText = initialStyle.getPropertyValue('--jaha-muted').trim();
+                const initialBorder = initialStyle.getPropertyValue('--jaha-border').trim();
+                const salesChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [
+                            {
+                                label: 'Gross Sales (৳)',
+                                data: chartSalesData,
+                                backgroundColor: 'rgba(239, 160, 196, 0.78)',
+                                borderColor: '#D96F9F',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Net Profit (৳)',
+                                data: chartProfitData,
+                                backgroundColor: 'rgba(111, 107, 114, 0.72)',
+                                borderColor: '#6F6B72',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: initialBorder },
+                                ticks: { color: initialText }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: initialText }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top', labels: { color: initialText, usePointStyle: true, boxWidth: 8 } }
+                        }
+                    }
+                });
+
+                document.addEventListener('jaha-theme-change', () => {
+                    const themeStyle = getComputedStyle(document.documentElement);
+                    const textColor = themeStyle.getPropertyValue('--jaha-muted').trim();
+                    const borderColor = themeStyle.getPropertyValue('--jaha-border').trim();
+                    salesChart.options.scales.x.ticks.color = textColor;
+                    salesChart.options.scales.y.ticks.color = textColor;
+                    salesChart.options.scales.y.grid.color = borderColor;
+                    salesChart.options.plugins.legend.labels.color = textColor;
+                    salesChart.update();
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+
+</div>
+</body>
+</html>

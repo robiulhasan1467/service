@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <filter id="light-letters" color-interpolation-filters="sRGB">
+    <feColorMatrix in="SourceGraphic" result="white-mask" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10 0 1 -10" />
+    <feFlood flood-color="#111114" result="ink" />
+    <feComposite in="ink" in2="white-mask" operator="in" result="dark-letters" />
+    <feMerge>
+      <feMergeNode in="SourceGraphic" />
+      <feMergeNode in="dark-letters" />
+    </feMerge>
+  </filter>
+</svg>

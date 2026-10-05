@@ -1,0 +1,180 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:attr="data-theme=${theme}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অর্ডার কনফার্মেশন | JaHa Live Shopping</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- JaHa Live Shopping CSS -->
+    <link rel="stylesheet" th:href="@{/css/liveshopping.css}">
+    <script th:replace="~{layout :: theme-init}"></script>
+</head>
+<body style="background-color: #f1f5f9;">
+
+    <!-- Topbar -->
+    <div class="jaha-topbar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div><i class="bi bi-telephone-fill me-1 text-danger"></i> হটলাইন: <span th:text="${hotline}">09613-111333</span></div>
+            <div class="d-flex align-items-center gap-3"><button class="btn btn-sm btn-outline-light" type="button" id="languageToggle" aria-label="Switch language to Bengali" aria-pressed="false"><i class="bi bi-translate me-1" aria-hidden="true"></i><span id="languageToggleLabel">বাংলা</span></button><a th:href="@{/}"><i class="bi bi-house-door me-1"></i> <span class="language-en">Home</span><span class="language-bn" hidden>হোম পেজ</span></a></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="jaha-main-header">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a th:href="@{/}">
+                <img th:src="@{/images/jaha_logo_transparent.png}" alt="JaHa Logo" class="jaha-brand-logo">
+            </a>
+            <div th:replace="~{layout :: theme-control}"></div>
+        </div>
+    </header>
+
+    <main class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Success Card -->
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white mb-4">
+                    <div class="bg-success text-white text-center p-4">
+                        <i class="bi bi-check-circle-fill display-3 mb-2 d-block"></i>
+                        <h3 class="fw-bold mb-1">ধন্যবাদ! আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে।</h3>
+                        <p class="mb-0 text-white-50">আমাদের একজন প্রতিনিধি শীঘ্রই আপনার নম্বরে কল দিয়ে অর্ডারটি কনফার্ম করবেন।</p>
+                    </div>
+
+                    <div class="p-4 p-md-5">
+                        <!-- Invoice Highlights -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center bg-light rounded-3 p-3 mb-4">
+                            <div>
+                                <small class="text-muted d-block">ইনভয়েস ট্র্যাকিং নম্বর:</small>
+                                <strong class="fs-5 text-danger" th:text="${sale.invoiceNo}">JH-20261005-1234</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">অর্ডারের তারিখ ও সময়:</small>
+                                <strong th:text="${#temporals.format(sale.saleDate, 'dd MMMM yyyy, hh:mm a')}">05 Oct 2026</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">পেমেন্ট মেথড:</small>
+                                <span class="badge bg-dark" th:text="${sale.paymentMethod}">CASH</span>
+                            </div>
+                        </div>
+
+                        <!-- Stepper -->
+                        <div class="tracking-stepper">
+                            <div class="step-node completed">
+                                <div class="step-circle"><i class="bi bi-check2"></i></div>
+                                <p class="step-title">অর্ডার গ্রহণ</p>
+                                <span class="step-time">সম্পন্ন</span>
+                            </div>
+                            <div class="step-node active">
+                                <div class="step-circle"><i class="bi bi-box-seam"></i></div>
+                                <p class="step-title">প্যাকেজিং</p>
+                                <span class="step-time">প্রক্রিয়াধীন</span>
+                            </div>
+                            <div class="step-node">
+                                <div class="step-circle"><i class="bi bi-truck"></i></div>
+                                <p class="step-title">কুরিয়ারে হস্তান্তর</p>
+                                <span class="step-time">শীঘ্রই</span>
+                            </div>
+                            <div class="step-node">
+                                <div class="step-circle"><i class="bi bi-house-check"></i></div>
+                                <p class="step-title">ডেলিভারি</p>
+                                <span class="step-time">পণ্য বুঝে নিন</span>
+                            </div>
+                        </div>
+
+                        <!-- Customer Details -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 h-100">
+                                    <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-person-fill text-danger me-1"></i> গ্রাহকের তথ্য:</h6>
+                                    <p class="mb-1"><strong>নাম:</strong> <span th:text="${sale.customer.name}">Customer Name</span></p>
+                                    <p class="mb-0"><strong>মোবাইল:</strong> <span th:text="${sale.customer.phone}">017XXXXXXXX</span></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 h-100">
+                                    <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> ডেলিভারি ঠিকানা:</h6>
+                                    <p class="mb-1" th:text="${sale.customer.address}">Dhaka, Bangladesh</p>
+                                    <small class="text-muted" th:text="${sale.paymentDetails}">Zone info</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ordered Items -->
+                        <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-bag-fill text-danger me-1"></i> অর্ডারকৃত পণ্যের তালিকা:</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>পণ্য</th>
+                                        <th class="text-center">পরিমাণ</th>
+                                        <th class="text-end">একক মূল্য</th>
+                                        <th class="text-end">মোট মূল্য</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${sale.items}">
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img th:src="${item.product.imagePath != null ? item.product.imagePath : '/images/jaha_logo_transparent.png'}"
+                                                     alt="Product" style="width: 40px; height: 40px; object-fit: cover;" class="rounded border">
+                                                <div>
+                                                    <span class="fw-bold d-block" th:text="${item.product.name}">Product Name</span>
+                                                    <small class="text-muted" th:text="${item.product.sku}">SKU</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center fw-bold" th:text="${item.quantity}">1</td>
+                                        <td class="text-end" th:text="'৳ ' + ${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                                        <td class="text-end fw-bold" th:text="'৳ ' + ${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-semibold">পণ্যের সাবটোটাল:</td>
+                                        <td class="text-end fw-bold" th:text="'৳ ' + ${#numbers.formatDecimal(sale.subtotal, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-semibold">ডেলিভারি চার্জ:</td>
+                                        <td class="text-end fw-bold text-danger" th:text="'৳ ' + ${#numbers.formatDecimal(sale.tax, 0, 'COMMA', 0, 'POINT')}">৳ 60</td>
+                                    </tr>
+                                    <tr class="table-danger">
+                                        <td colspan="3" class="text-end fw-bold fs-5 text-dark">সর্বমোট প্রদেয় (Cash on Delivery):</td>
+                                        <td class="text-end fw-bold fs-5 text-danger" th:text="'৳ ' + ${#numbers.formatDecimal(sale.totalAmount, 0, 'COMMA', 0, 'POINT')}">৳ 0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <a th:href="@{/}" class="btn btn-outline-dark rounded-pill px-4">
+                                <i class="bi bi-arrow-left me-1"></i> কেনাকাটা চালিয়ে যান
+                            </a>
+                            <a th:href="@{/order-track(trackingId=${sale.invoiceNo})}" class="btn btn-danger rounded-pill px-4 fw-bold">
+                                <i class="bi bi-geo-alt-fill me-1"></i> লাইভ ট্র্যাক করুন
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="jaha-footer text-center">
+        <div class="container">
+            <p class="small text-white-50 mb-0">&copy; 2026 JaHa Live Shopping Bangladesh &bull; হটলাইন: <span th:text="${hotline}">09613-111333</span></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/liveshopping.js}"></script>
+    <script th:replace="~{layout :: common-script}"></script>
+</body>
+</html>

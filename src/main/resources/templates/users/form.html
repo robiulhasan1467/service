@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#user-form-content}, 'Staff Account Details', 'users')}">
+<body>
+<div id="user-form-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1" th:text="${userDto.id != null ? 'Edit Staff Account: ' + userDto.username : 'Create New Staff Account'}">User Account</h2>
+            <p class="text-muted small mb-0">Configure authentication credentials and role authorizations.</p>
+        </div>
+        <a th:href="@{/users}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to User List
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4">
+                <form th:action="@{/users/save}" th:object="${userDto}" method="post">
+                    <input type="hidden" th:field="*{id}">
+
+                    <div class="row g-3">
+                        <!-- Full Name -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Full Legal Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{fullName}" class="form-control" placeholder="e.g. Jean-Luc Godard" required>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}">Name Error</div>
+                        </div>
+
+                        <!-- Username -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Login Username <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" th:field="*{username}" class="form-control" placeholder="e.g. jluc, cashier2" required>
+                            </div>
+                            <div class="text-danger small mt-1" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username Error</div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Password
+                                <span class="text-danger" th:if="${userDto.id == null}">*</span>
+                                <small class="text-muted fw-normal" th:if="${userDto.id != null}">(Leave blank to keep existing)</small>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input type="password" th:field="*{password}" class="form-control" 
+                                       placeholder="••••••••" 
+                                       th:required="${userDto.id == null}">
+                            </div>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">System Role <span class="text-danger">*</span></label>
+                            <select th:field="*{role}" class="form-select" required>
+                                <option th:each="r : ${roles}" th:value="${r}" th:text="${r} + ' (' + ${r.description} + ')'"></option>
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Account Status <span class="text-danger">*</span></label>
+                            <select th:field="*{status}" class="form-select" required>
+                                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" th:field="*{email}" class="form-control" placeholder="staff@chocolateshop.com">
+                            </div>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" th:field="*{phone}" class="form-control" placeholder="+1 (555) 000-0000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Role Matrix Help Box -->
+                    <div class="mt-4 p-3 bg-light rounded border">
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-info-circle me-1 text-primary"></i>Role Permissions Overview</h6>
+                        <ul class="list-unstyled mb-0 small text-muted">
+                            <li><strong class="text-danger">ADMIN:</strong> Full unrestricted system access, user administration, financial auditing.</li>
+                            <li><strong class="text-primary">MANAGER:</strong> Catalog, purchases, supplier/customer ledgers, sales returns, reports.</li>
+                            <li><strong class="text-warning text-dark">INVENTORY_MANAGER:</strong> Product catalog, stock recounts, purchase receipts, damage write-offs.</li>
+                            <li><strong class="text-success">CASHIER:</strong> Point of Sale (POS) checkout, sales history, customer profile lookup.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <a th:href="@{/users}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-artisan px-4">
+                            <i class="bi bi-check-circle me-1"></i> Save Staff Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

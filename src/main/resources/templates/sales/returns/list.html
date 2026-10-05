@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#return-list-content}, 'Sales Returns History', 'sales-return')}">
+<body>
+<div id="return-list-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Sales Returns History</h2>
+            <p class="text-muted small mb-0">Record of all reversed transactions, refunded amounts, and restocking logs.</p>
+        </div>
+        <a th:href="@{/sales/returns/new}" class="btn btn-danger">
+            <i class="bi bi-arrow-return-left me-1"></i> New Return
+        </a>
+    </div>
+
+    <!-- Returns Table -->
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Return #</th>
+                        <th>Original Invoice</th>
+                        <th>Return Date</th>
+                        <th>Processed By</th>
+                        <th>Refund Total</th>
+                        <th>Reason</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${returnPage.empty}">
+                        <td colspan="7" class="text-center py-4 text-muted">No sales return records found.</td>
+                    </tr>
+                    <tr th:each="ret : ${returnPage.content}">
+                        <td><strong class="text-danger" th:text="${ret.returnNo}">RET-001</strong></td>
+                        <td>
+                            <a th:href="@{'/sales/invoice/' + ${ret.sale.invoiceNo}}" class="fw-semibold text-primary" th:text="${ret.sale.invoiceNo}">INV-001</a>
+                        </td>
+                        <td th:text="${#temporals.format(ret.returnDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td th:text="${ret.processedBy != null ? ret.processedBy.username : 'staff'}">Staff</td>
+                        <td><strong class="text-danger" th:text="'$' + ${#numbers.formatDecimal(ret.refundAmount, 1, 2)}">$0.00</strong></td>
+                        <td class="text-truncate" style="max-width: 250px;" th:text="${ret.reason}">Reason</td>
+                        <td class="text-end">
+                            <a th:href="@{'/sales/returns/view/' + ${ret.id}}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i> Details
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#customers-list-content}, 'Customer Directory', 'customers')}">
+<body>
+<div id="customers-list-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Customers & Shoppers</h2>
+            <p class="text-muted small mb-0">Track retail patrons, VIP chocolate club members, purchase histories, and dues.</p>
+        </div>
+        <a th:href="@{/customers/new}" class="btn btn-artisan">
+            <i class="bi bi-person-plus me-1"></i> Register Customer
+        </a>
+    </div>
+
+    <!-- Search Box -->
+    <div class="card border-0 shadow-sm p-3 mb-4">
+        <form method="get" th:action="@{/customers}" class="row g-2">
+            <div class="col-md-9">
+                <input type="text" name="query" class="form-control" placeholder="Search by customer name or phone..." th:value="${query}">
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-choco flex-fill">Search</button>
+                <a th:href="@{/customers}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Customer Name</th>
+                        <th>Type</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Opening Due</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(customers)}">
+                        <td colspan="7" class="text-center py-4 text-muted">No customers found.</td>
+                    </tr>
+                    <tr th:each="c : ${customers}">
+                        <td><strong class="text-dark" th:text="${c.name}">Name</strong></td>
+                        <td>
+                            <span th:if="${c.isWalkIn}" class="badge bg-secondary">WALK-IN</span>
+                            <span th:unless="${c.isWalkIn}" class="badge bg-primary">REGISTERED</span>
+                        </td>
+                        <td th:text="${c.phone}">Phone</td>
+                        <td th:text="${c.email}">Email</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(c.openingDue, 1, 2)}">$0.00</td>
+                        <td>
+                            <span th:if="${c.status.name() == 'ACTIVE'}" class="badge bg-success">ACTIVE</span>
+                            <span th:if="${c.status.name() == 'INACTIVE'}" class="badge bg-secondary">INACTIVE</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/customers/view/' + ${c.id}}" class="btn btn-sm btn-outline-primary" title="View Profile & Statement">
+                                <i class="bi bi-eye"></i> Statement
+                            </a>
+                            <a th:unless="${c.isWalkIn}" th:href="@{'/customers/edit/' + ${c.id}}" class="btn btn-sm btn-outline-secondary ms-1" title="Edit Customer">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

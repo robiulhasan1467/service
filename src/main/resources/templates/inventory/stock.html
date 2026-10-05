@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: main-layout(~{::#stock-content}, 'Inventory Stock Levels', 'inventory-stock')}">
+<body>
+<div id="stock-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1">Current Stock & Thresholds</h2>
+            <p class="text-muted small mb-0">Monitor on-hand inventory, minimum reorder triggers, and approaching shelf expirations.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/inventory/adjust}" class="btn btn-outline-warning text-dark fw-semibold">
+                <i class="bi bi-sliders me-1"></i> Stock Adjustment
+            </a>
+            <a th:href="@{/purchases/new}" class="btn btn-artisan">
+                <i class="bi bi-cart-plus me-1"></i> Restock via Purchase
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Strip if Low Stock or Expiring -->
+    <div th:if="${lowStockCount > 0}" class="alert alert-warning d-flex align-items-center mb-4 shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+        <div>
+            <strong th:text="${lowStockCount} + ' chocolate product(s) are at or below minimum safety stock levels!'">Notice</strong>
+            <div class="small">Initiate purchase orders or adjust inventory to avoid stockouts at counter.</div>
+        </div>
+        <a th:href="@{/inventory/stock(lowStockOnly=true)}" class="btn btn-sm btn-dark ms-auto" th:if="${!lowStockOnly}">Filter Low Stock</a>
+        <a th:href="@{/inventory/stock}" class="btn btn-sm btn-outline-dark ms-auto" th:if="${lowStockOnly}">Show All Stock</a>
+    </div>
+
+    <!-- Stock Table -->
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Chocolate Product</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th class="text-center">Current Stock</th>
+                        <th class="text-center">Min Safety Level</th>
+                        <th class="text-center">Shelf Status</th>
+                        <th>Expiry Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(products)}">
+                        <td colspan="8" class="text-center py-4 text-muted">No products found.</td>
+                    </tr>
+                    <tr th:each="p : ${products}">
+                        <td>
+                            <strong th:text="${p.name}">Product Name</strong>
+                            <small class="text-muted d-block" th:text="${p.brand != null ? p.brand.name : 'In-House'}"></small>
+                        </td>
+                        <td><code th:text="${p.sku}">SKU</code></td>
+                        <td><span class="badge bg-light text-dark border" th:text="${p.category.name}">Category</span></td>
+                        <td class="text-center">
+                            <span th:if="${p.stockQuantity <= 0}" class="badge bg-danger fs-6">0</span>
+                            <span th:if="${p.stockQuantity > 0 && p.isLowStock()}" class="badge bg-warning text-dark fs-6" th:text="${p.stockQuantity}">5</span>
+                            <span th:if="${p.stockQuantity > p.minStockLevel}" class="badge bg-success fs-6" th:text="${p.stockQuantity}">25</span>
+                            <small class="text-muted d-block" th:text="${p.unit}">units</small>
+                        </td>
+                        <td class="text-center fw-semibold text-muted" th:text="${p.minStockLevel} + ' ' + ${p.unit}">5 pcs</td>
+                        <td class="text-center">
+                            <span th:if="${p.stockQuantity <= 0}" class="badge bg-danger">OUT OF STOCK</span>
+                            <span th:if="${p.stockQuantity > 0 && p.isLowStock()}" class="badge bg-warning text-dark">REORDER REQUIRED</span>
+                            <span th:if="${p.stockQuantity > p.minStockLevel}" class="badge bg-success">HEALTHY</span>
+                        </td>
+                        <td>
+                            <span th:if="${p.expiryDate != null}"
+                                  th:classappend="${p.isExpired()} ? 'text-danger fw-bold' : (${p.isExpiringSoon()} ? 'text-warning fw-bold' : 'text-muted')"
+                                  th:text="${p.expiryDate}">2026-12-31</span>
+                            <span th:if="${p.expiryDate == null}" class="text-muted">-</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/inventory/history?productId=' + ${p.id}}" class="btn btn-sm btn-outline-secondary" title="View Ledger Movements">
+                                <i class="bi bi-clock-history"></i> Ledger
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
